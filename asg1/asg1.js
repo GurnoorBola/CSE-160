@@ -34,6 +34,8 @@ function setupWegbGL(){
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
 function connectVariablesToGLSL(){
@@ -71,21 +73,17 @@ const TRIANGLE = 1;
 const CIRCLE = 2;
 
 //Globals related UI elemenents
-let g_selectedColor = [
-  document.getElementById('redSlide').value,
-  document.getElementById('greenSlide').value,
-  document.getElementById('blueSlide').value,
-  1.0
-]
-let g_selectedSize = document.getElementById('sizeSlide').value;
 let g_selectedType=POINT;
 
 //set up actions for the HTML UI elements
 function addActionsForButtons(){
+  var redSlide = document.getElementById('redSlide');
+  var greenSlide = document.getElementById('greenSlide');
+  var blueSlide = document.getElementById('blueSlide');
 
   //Button Events (Shape Type)
-  document.getElementById('green').onclick = function () {g_selectedColor = [0.0, 1.0, 0.0, 1.0]; redSlide.value=0; greenSlide.value=100; blueSlide.value=0;};
-  document.getElementById('red').onclick = function () {g_selectedColor = [1.0, 0.0, 0.0, 1.0]; redSlide.value=100; greenSlide.value=0; blueSlide.value=0;};
+  document.getElementById('green').onclick = function () {redSlide.value=0; greenSlide.value=100; blueSlide.value=0;};
+  document.getElementById('red').onclick = function () {redSlide.value=100; greenSlide.value=0; blueSlide.value=0;};
   document.getElementById('clearButton').onclick = function() {g_shapesList=[]; renderAllShapes(); };
 
   document.getElementById('pointButton').onclick = function() {g_selectedType=POINT};
@@ -97,9 +95,10 @@ function getSliders(){
   var redSlide = document.getElementById('redSlide');
   var greenSlide = document.getElementById('greenSlide');
   var blueSlide = document.getElementById('blueSlide');
+  var tSlide = document.getElementById('tSlide');
   var sizeSlide = document.getElementById('sizeSlide');
 
-  return [[redSlide.value/100, greenSlide.value/100, blueSlide.value/100, 1.0], sizeSlide.value]
+  return [[redSlide.value/100, greenSlide.value/100, blueSlide.value/100, tSlide.value/100], sizeSlide.value]
 }
 
 var g_shapesList = [];
@@ -107,18 +106,19 @@ var g_shapesList = [];
 function click(ev) {
   // extract the event click and return it in WebGL coordinates
   [x, y] = convertCoordinatesEventToGL(ev);
+  [rgba, size] = getSliders();
+  //console.log([x,y])
 
   //Create and store the new point
   let point;
   if (g_selectedType == POINT){
     point = new Point();
   } else if (g_selectedType == TRIANGLE){
-    point = new Triangle();
+    point = new Triangle([x,y], rgba, size);
   } else {
-    point = new Circle();
+    point = new Circle([x,y], rgba, size);
   }
   point.position = [x, y];
-  [rgba, size] = getSliders();
   point.color=rgba.slice();
   point.size=size;
   g_shapesList.push(point);
