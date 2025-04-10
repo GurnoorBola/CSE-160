@@ -84,9 +84,12 @@ function addActionsForHtmlUI(){
 
   var sizeSlide = document.getElementById('sizeSlide');
 
-  g_selectedColor[0] = redSlide.value;
-  g_selectedColor[1] = greenSlide.value;
-  g_selectedColor[2] = blueSlide.value;
+  g_selectedColor = [
+    redSlide.value,
+    greenSlide.value,
+    blueSlide.value, 
+    1.0
+  ]
   g_selectedSize = sizeSlide.value;
 
   //Button Events (Shape Type)
