@@ -71,26 +71,17 @@ const TRIANGLE = 1;
 const CIRCLE = 2;
 
 //Globals related UI elemenents
-let g_selectedColor = [1.0, 1.0, 1.0, 1.0]
-let g_selectedSize = 5;
+let g_selectedColor = [
+  document.getElementById('redSlide').value,
+  document.getElementById('greenSlide').value,
+  document.getElementById('blueSlide').value,
+  1.0
+]
+let g_selectedSize = document.getElementById('sizeSlide').value;
 let g_selectedType=POINT;
 
 //set up actions for the HTML UI elements
-function addActionsForHtmlUI(){
-
-  var redSlide = document.getElementById('redSlide');
-  var greenSlide = document.getElementById('greenSlide');
-  var blueSlide = document.getElementById('blueSlide');
-
-  var sizeSlide = document.getElementById('sizeSlide');
-
-  g_selectedColor = [
-    redSlide.value,
-    greenSlide.value,
-    blueSlide.value, 
-    1.0
-  ]
-  g_selectedSize = sizeSlide.value;
+function addActionsForButtons(){
 
   //Button Events (Shape Type)
   document.getElementById('green').onclick = function () {g_selectedColor = [0.0, 1.0, 0.0, 1.0]; redSlide.value=0; greenSlide.value=100; blueSlide.value=0;};
@@ -100,12 +91,15 @@ function addActionsForHtmlUI(){
   document.getElementById('pointButton').onclick = function() {g_selectedType=POINT};
   document.getElementById('triButton').onclick = function() {g_selectedType=TRIANGLE};
   document.getElementById('circleButton').onclick = function () {g_selectedType=CIRCLE}
+}
 
-  redSlide.addEventListener('mouseup', function() {g_selectedColor[0] = this.value/100; });
-  greenSlide.addEventListener('mouseup', function() {g_selectedColor[1] = this.value/100; });
-  blueSlide.addEventListener('mouseup', function() {g_selectedColor[2] = this.value/100; });
+function getSliders(){
+  var redSlide = document.getElementById('redSlide');
+  var greenSlide = document.getElementById('greenSlide');
+  var blueSlide = document.getElementById('blueSlide');
+  var sizeSlide = document.getElementById('sizeSlide');
 
-  sizeSlide.addEventListener('mouseup', function() {g_selectedSize = this.value; });
+  return [[redSlide.value/100, greenSlide.value/100, blueSlide.value/100, 1.0], sizeSlide.value]
 }
 
 var g_shapesList = [];
@@ -124,8 +118,9 @@ function click(ev) {
     point = new Circle();
   }
   point.position = [x, y];
-  point.color=g_selectedColor.slice();
-  point.size=g_selectedSize;
+  [rgba, size] = getSliders();
+  point.color=rgba.slice();
+  point.size=size;
   g_shapesList.push(point);
 
   //Draw every shape that is supposed to be in canvas
@@ -177,7 +172,7 @@ function main() {
   connectVariablesToGLSL();
 
   //set up actions for the HTML UI elements
-  addActionsForHtmlUI();
+  addActionsForButtons();
 
   // Register function (event handler) to be called on a mouse press
   canvas.onmousedown = click;
