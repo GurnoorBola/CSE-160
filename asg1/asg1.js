@@ -85,6 +85,7 @@ function addActionsForButtons(){
   document.getElementById('green').onclick = function () {redSlide.value=0; greenSlide.value=100; blueSlide.value=0;};
   document.getElementById('red').onclick = function () {redSlide.value=100; greenSlide.value=0; blueSlide.value=0;};
   document.getElementById('clearButton').onclick = function() {g_shapesList=[]; renderAllShapes(); };
+  document.getElementById('drawing').onclick = function() {g_shapesList=[]; renderAllShapes(); drawButterfly()}
 
   document.getElementById('pointButton').onclick = function() {g_selectedType=POINT};
   document.getElementById('triButton').onclick = function() {g_selectedType=TRIANGLE};
@@ -163,6 +164,7 @@ function sendTextToHTML(text, htmlID){
   }
   htmlElm.innerHTML = text;
 }
+
 
 function main() {
   
