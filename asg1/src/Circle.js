@@ -1,10 +1,10 @@
 class Circle{
-    constructor(center, color, size){
+    constructor(center, color, size, detail){
         this.type='circle';
         this.position = center;
         this.color = color;
-        this.size = 5.0;
-        this.segments = 10;
+        this.size = size;
+        this.segments = detail;
 
         var vertexBuffer = gl.createBuffer();
         if (!vertexBuffer) {
@@ -42,6 +42,6 @@ class Circle{
         // Enable the assignmnet to a_Position variable
         gl.enableVertexAttribArray(a_Position);
     
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, slices+2);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices.length/2);
     }
 }

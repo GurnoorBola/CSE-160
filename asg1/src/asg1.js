@@ -104,8 +104,9 @@ function getSliders(){
   var blueSlide = document.getElementById('blueSlide');
   var tSlide = document.getElementById('tSlide');
   var sizeSlide = document.getElementById('sizeSlide');
+  var detailSlide = document.getElementById('detailSlide');
 
-  return [[redSlide.value/100, greenSlide.value/100, blueSlide.value/100, tSlide.value/100], sizeSlide.value]
+  return [[redSlide.value/100, greenSlide.value/100, blueSlide.value/100, tSlide.value/100], sizeSlide.value, detailSlide.value]
 }
 
 var g_shapesList = [];
@@ -113,7 +114,7 @@ var g_shapesList = [];
 function click(ev) {
   // extract the event click and return it in WebGL coordinates
   [x, y] = convertCoordinatesEventToGL(ev);
-  [rgba, size] = getSliders();
+  [rgba, size, detail] = getSliders();
   //console.log([x,y])
 
   //Create and store the new point
@@ -123,7 +124,7 @@ function click(ev) {
   } else if (g_selectedType == TRIANGLE){
     point = new Triangle([x,y], rgba, size);
   } else {
-    point = new Circle([x,y], rgba, size);
+    point = new Circle([x,y], rgba, size, detail);
   }
   point.position = [x, y];
   point.color=rgba.slice();
@@ -136,7 +137,7 @@ function click(ev) {
 
 function cursor(ev) {
   [x, y] = convertCoordinatesEventToGL(ev);
-  [rgba, size] = getSliders();
+  [rgba, size, detail] = getSliders();
   //console.log([x,y])
 
   //Create and store the new point
@@ -146,7 +147,7 @@ function cursor(ev) {
   } else if (g_selectedType == TRIANGLE){
     point = new Triangle([x,y], rgba, size);
   } else {
-    point = new Circle([x,y], rgba, size);
+    point = new Circle([x,y], rgba, size, detail);
   }
   point.position = [x, y];
   point.color=rgba.slice();
