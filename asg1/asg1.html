@@ -6,6 +6,12 @@
   </head>
 
   <body onload='main()'>
+    <style>
+      canvas {
+        cursor: none;
+      }
+    </style>
+
     <canvas id='webgl' width='400' height='400'>
         Please use a browser that supports 'canvas'
     </canvas>
@@ -13,8 +19,14 @@
 
     <p id ='numdot'> XXX </p>
     
-    <button type='button' id='green'>Green</button>
     <button type='button' id='red'>Red</button>
+    <button type='button' id='green'>Green</button>
+    <button type='button' id='blue'>Blue</button>
+    <button type='button' id='bgColor'>BG</button>
+    <p>
+    
+    <button type='button' id='undo'>Undo</button>
+    <button type='button' id='redo'>Redo</button> 
     <button type='button' id='clearButton'>Clear</button>
     <button type='button' id='drawing'>Drawing</button>
     <p>
@@ -40,6 +52,20 @@
     <label style="display: inline-block; width: 50px;">Size</label>
     <input type='range' min='5' max='40' value='5' class='slider' id='sizeSlide'>
     <p>
+    
+    <br>
+    <p>Gurnoor Bola <br>gsbola@ucsc.edu</p>
+    <p>Notes to Grader: <br><br>Awesome features:
+    <ul> 
+      <li>cursor that displays the shape you are currently set to place</li>
+      <li>undo</li>
+      <li>redo</li>
+      <li>background color changer (BG)</li>
+      <li>transparency slider</li>
+    </ul>
+
+    <p>Drawing inspo: </p>
+    <img src='images/bfly.jpg' width='250' height='250' alt='butterfly'>
     <script src='lib/webgl-utils.js'></script>
     <script src='lib/webgl-debug.js'></script>
     <script src='lib/cuon-utils.js'></script>

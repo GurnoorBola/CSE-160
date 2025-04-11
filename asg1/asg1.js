@@ -24,6 +24,8 @@ let a_Position;
 let u_FragColor;
 let u_Size;
 
+let isDrawing = true;
+
 function setupWegbGL(){
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
@@ -84,8 +86,12 @@ function addActionsForButtons(){
   //Button Events (Shape Type)
   document.getElementById('green').onclick = function () {redSlide.value=0; greenSlide.value=100; blueSlide.value=0;};
   document.getElementById('red').onclick = function () {redSlide.value=100; greenSlide.value=0; blueSlide.value=0;};
-  document.getElementById('clearButton').onclick = function() {g_shapesList=[]; renderAllShapes(); };
-  document.getElementById('drawing').onclick = function() {g_shapesList=[]; renderAllShapes(); drawButterfly()}
+  document.getElementById('blue').onclick = function () {redSlide.value=0; greenSlide.value=0; blueSlide.value=100;};
+  document.getElementById('undo').onclick = function() {undo();};
+  document.getElementById('redo').onclick = function() {redo();};
+  document.getElementById('clearButton').onclick = function() {g_redoList = []; g_shapesList = []; g_undoList = [], isDrawing = true; renderAllShapes(); };
+  document.getElementById('bgColor').onclick = function() {gl.clearColor(redSlide.value/100, greenSlide.value/100, blueSlide.value/100, 1.0); isDrawing = true; renderAllShapes(); };
+  document.getElementById('drawing').onclick = function() {g_shapesList=[]; g_undoList = []; g_redoList = []; isDrawing = false; renderAllShapes(); drawButterfly()}
 
   document.getElementById('pointButton').onclick = function() {g_selectedType=POINT};
   document.getElementById('triButton').onclick = function() {g_selectedType=TRIANGLE};
@@ -128,6 +134,27 @@ function click(ev) {
   renderAllShapes();
 }
 
+function cursor(ev) {
+  [x, y] = convertCoordinatesEventToGL(ev);
+  [rgba, size] = getSliders();
+  //console.log([x,y])
+
+  //Create and store the new point
+  let point;
+  if (g_selectedType == POINT){
+    point = new Point();
+  } else if (g_selectedType == TRIANGLE){
+    point = new Triangle([x,y], rgba, size);
+  } else {
+    point = new Circle([x,y], rgba, size);
+  }
+  point.position = [x, y];
+  point.color=rgba.slice();
+  point.size=size;
+  renderAllShapes();
+  point.render();
+}
+
 //Extract the event click and return it in WebGL coordinates
 function convertCoordinatesEventToGL(ev){
   var x = ev.clientX; // x coordinate of a mouse pointer
@@ -165,6 +192,34 @@ function sendTextToHTML(text, htmlID){
   htmlElm.innerHTML = text;
 }
 
+let g_undoList = [];
+let g_redoList = []
+function undo(){
+  if (g_undoList.length == 0){
+    return;
+  }
+  let undoAmmount = g_undoList.pop();
+  let redoElements = []
+  for (let i = 0; i < undoAmmount; i++){
+    redoElements.push(g_shapesList.pop());
+  }
+  g_redoList.push(redoElements);
+  renderAllShapes();
+}
+
+function redo(){
+  if (g_redoList.length == 0){
+    return;
+  }
+  let undoAmmount = 0;
+  let redoElements = g_redoList.pop()
+  while(redoElements.length > 0){
+    undoAmmount+=1;
+    g_shapesList.push(redoElements.pop());
+  }
+  g_undoList.push(undoAmmount);
+  renderAllShapes();
+}
 
 function main() {
   
@@ -175,10 +230,22 @@ function main() {
 
   //set up actions for the HTML UI elements
   addActionsForButtons();
+  
+
 
   // Register function (event handler) to be called on a mouse press
-  canvas.onmousedown = click;
-  canvas.onmousemove = function(ev) { if (ev.buttons == 1) { click (ev) } };
+  canvas.addEventListener('mouseleave', () => {
+    if (isDrawing){
+      renderAllShapes();
+    }
+  });
+  canvas.onmousedown = function(ev) {click(ev); g_undoList.push(1); isDrawing = true;};
+  canvas.onmousemove = function(ev) { 
+    if (ev.buttons == 1) { 
+      click(ev); g_undoList[g_undoList.length-1]+=1; g_redoList = [] 
+    } else if (isDrawing) {
+      cursor(ev); 
+    } };
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
