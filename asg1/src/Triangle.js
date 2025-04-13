@@ -1,7 +1,7 @@
 class Triangle{
     constructor(xy, color, size){
         this.position = xy;
-        this.color = color;
+        this.color = color.slice();
         this.size = size;
 
         var vertexBuffer = gl.createBuffer();
@@ -11,15 +11,13 @@ class Triangle{
         }
         this.buffer = vertexBuffer
 
-        gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
-
         gl.uniform1f(u_Size, size);
 
         var d = size/200.0; //delta
         this.vertices = [xy[0], xy[1], xy[0]+d, xy[1], xy[0], xy[1]+d];
     }
     render() {
-
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
         //Bind the buffer object to target
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     
