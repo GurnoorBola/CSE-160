@@ -139,9 +139,25 @@ function buildDragon(){
   let pupilColor = [49,44,32];
   let eyeWhiteColor = [248, 245, 250];
 
+  //Charizard Body
+  let body = new Cube(bodyColor);
+  body.matrix.translate(0, 0, 0);
+  var bodyCoord = new Matrix4(body.matrix);
+  body.matrix.scale(0.46, 0.5, 0.46);
+  g_shapesList.push(body);
+
+  //Charizard neck
+  let neck = new Cube(bodyColor);
+  neck.matrix = bodyCoord;
+  neck.matrix.translate(0, 0.3, 0);
+  var neckCoord = new Matrix4(neck.matrix);
+  neck.matrix.scale(0.2, 0.2, 0.2);
+  g_shapesList.push(neck);
+
   //Charizard head
   let head = new Cube(bodyColor);
-  head.matrix.translate(0, 0.45, 0);
+  head.matrix = new Matrix4(neckCoord)
+  head.matrix.translate(0, 0.25, 0);
   var headCoord = new Matrix4(head.matrix);
   head.matrix.scale(0.3, 0.3, 0.3);
   g_shapesList.push(head);
@@ -249,7 +265,9 @@ function buildDragon(){
   pupil2.matrix.translate(0.065, 0.05, -0.16001);
   pupil2.matrix.scale(-0.045, 0.035, 0.07);
   g_shapesList.push(pupil2);
-  
+
+  //Charizard Body
+
 }
 
 function main() {
