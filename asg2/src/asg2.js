@@ -130,48 +130,126 @@ function sendTextToHTML(text, htmlID){
   htmlElm.innerHTML = text;
 }
 
-function buildRobot(){
-  bodyColor = [160, 169, 180];
-  jawColor = [135, 144, 155];
-  eyeColor = [105,222,75];
-  holeColor=[20,20,20];
+function buildDragon(){
+  let bodyColor = [249,177,101];
+  let caColor = [213,221,221];
+  let wingColor = [54,147,162];
+  let tongueColor = [168,120,146];
+  let counterColor = [250,238,178];
+  let pupilColor = [49,44,32];
+  let eyeWhiteColor = [248, 245, 250];
 
-  let tophead = new Cube(bodyColor);
-  tophead.matrix.translate(0, 0.45, 0);
-  tophead.matrix.scale(0.4, 0.3, 0.4);
-  g_shapesList.push(tophead);
+  //Charizard head
+  let head = new Cube(bodyColor);
+  head.matrix.translate(0, 0.45, 0);
+  var headCoord = new Matrix4(head.matrix);
+  head.matrix.scale(0.3, 0.3, 0.3);
+  g_shapesList.push(head);
 
-  let jaw = new Cube(jawColor);
-  jaw.matrix.translate(0, 0.2, -0.013);
-  jaw.matrix.rotate(-12, 1, 0, 0)
-  jaw.matrix.scale(0.43, 0.15, 0.42);
-  g_shapesList.push(jaw);
+  let forehead = new Cube(bodyColor);
+  forehead.matrix = new Matrix4(headCoord);
+  forehead.matrix.translate(0, 0.079, -0.03);
+  forehead.matrix.scale(0.3, 0.15, 0.32);
+  g_shapesList.push(forehead);
 
-  let mouth = new Cube(holeColor);
-  mouth.matrix.translate(0, 0.22, -0.02);
-  mouth.matrix.rotate(-12, 1, 0, 0)
-  mouth.matrix.scale(0.35, 0.12, 0.40);
-  g_shapesList.push(mouth);
+  let topmouth = new Cube(bodyColor);
+  topmouth.matrix = new Matrix4(headCoord);
+  topmouth.matrix.translate(0, -0.03, -0.09);
+  topmouth.matrix.scale(0.3, 0.07, 0.38);
+  g_shapesList.push(topmouth);
 
-  let lefteye = new Cube(eyeColor);
-  lefteye.matrix.translate(-0.11, 0.4, -0.16)
-  lefteye.matrix.scale(0.1, 0.13, 0.2);
-  g_shapesList.push(lefteye);
+  let botmouth = new Cube(bodyColor);
+  botmouth.matrix = new Matrix4(headCoord);
+  botmouth.matrix.translate(0, -0.14, -0.09);
+  botmouth.matrix.scale(0.3, 0.07, 0.38);
+  g_shapesList.push(botmouth);
 
-  let righteye = new Cube(eyeColor);
-  righteye.matrix.translate(0.11, 0.4, -0.16)
-  righteye.matrix.scale(0.1, 0.13, 0.2);
-  g_shapesList.push(righteye);
+  let tongue = new Cube(tongueColor);
+  tongue.matrix = new Matrix4(headCoord);
+  tongue.matrix.translate(0, -0.095, -0.054);
+  tongue.matrix.scale(0.25, 0.035, 0.38);
+  g_shapesList.push(tongue);
 
-  let lefteyehole = new Cube(holeColor);
-  lefteyehole.matrix.translate(-0.11, 0.4, -0.15)
-  lefteyehole.matrix.scale(0.12, 0.15, 0.2);
-  g_shapesList.push(lefteyehole);
+  let tooth1 = new Cube(caColor);
+  tooth1.matrix = new Matrix4(headCoord);
+  tooth1.matrix.translate(-0.08, -0.043, -0.26);
+  tooth1.matrix.scale(0.03, 0.07, 0.03);
+  g_shapesList.push(tooth1);
 
-  let righteyehole = new Cube(holeColor);
-  righteyehole.matrix.translate(0.11, 0.4, -0.15)
-  righteyehole.matrix.scale(0.12, 0.15, 0.2);
-  g_shapesList.push(righteyehole);
+  let tooth2 = new Cube(caColor);
+  tooth2.matrix = new Matrix4(headCoord);
+  tooth2.matrix.translate(0.08, -0.043, -0.26);
+  tooth2.matrix.scale(0.03, 0.07, 0.03);
+  g_shapesList.push(tooth2);
+
+  let tooth3 = new Cube(caColor);
+  tooth3.matrix = new Matrix4(headCoord);
+  tooth3.matrix.translate(-0.08, -0.129, -0.26);
+  tooth3.matrix.scale(0.03, 0.07, 0.03);
+  g_shapesList.push(tooth3);
+
+  let tooth4 = new Cube(caColor);
+  tooth4.matrix = new Matrix4(headCoord);
+  tooth4.matrix.translate(0.08, -0.129, -0.26);
+  tooth4.matrix.scale(0.03, 0.07, 0.03);
+  g_shapesList.push(tooth4);
+
+  let nose = new Cube(bodyColor);
+  nose.matrix = new Matrix4(headCoord);
+  nose.matrix.translate(0, 0, -0.09);
+  nose.matrix.scale(0.1, 0.07, 0.38);
+  g_shapesList.push(nose);
+
+  let ear1 = new Cube(bodyColor);
+  ear1.matrix = new Matrix4(headCoord);
+  ear1.matrix.translate(-0.08, 0.18, 0.1);
+  ear1.matrix.rotate(25, 1, 0, 0)
+  ear1.matrix.scale(0.07, 0.18, 0.07);
+  g_shapesList.push(ear1);
+
+  let ear2 = new Cube(bodyColor);
+  ear2.matrix = new Matrix4(headCoord);
+  ear2.matrix.translate(0.08, 0.18, 0.1);
+  ear2.matrix.rotate(25, 1, 0, 0)
+  ear2.matrix.scale(0.07, 0.18, 0.07);
+  g_shapesList.push(ear2);
+
+  let nostril1 = new Cube(pupilColor);
+  nostril1.matrix = new Matrix4(headCoord);
+  nostril1.matrix.translate(-0.03, 0.021, -0.095);
+  nostril1.matrix.scale(0.005, 0.02, 0.38);
+  g_shapesList.push(nostril1);
+
+  let nostril2 = new Cube(pupilColor);
+  nostril2.matrix = new Matrix4(headCoord);
+  nostril2.matrix.translate(0.03, 0.021, -0.095);
+  nostril2.matrix.scale(0.005, 0.02, 0.38);
+  g_shapesList.push(nostril2);
+
+  let eye1 = new TriPrism(eyeWhiteColor);
+  eye1.matrix = new Matrix4(headCoord);
+  eye1.matrix.translate(-0.07, 0.057, -0.16);
+  eye1.matrix.scale(0.07, 0.05, 0.07);
+  g_shapesList.push(eye1);
+
+  let eye2 = new TriPrism(eyeWhiteColor);
+  eye2.matrix = new Matrix4(headCoord);
+  eye2.matrix.translate(0.07, 0.057, -0.16);
+  eye2.matrix.scale(-0.07, 0.05, 0.07);
+  g_shapesList.push(eye2);
+
+  let pupil1 = new TriPrism(pupilColor);
+  pupil1.matrix = new Matrix4(headCoord);
+  pupil1.matrix.translate(-0.065, 0.05, -0.16001);
+  pupil1.matrix.scale(0.045, 0.035, 0.07);
+  g_shapesList.push(pupil1);
+
+  let pupil2 = new TriPrism(pupilColor);
+  pupil2.matrix = new Matrix4(headCoord);
+  pupil2.matrix.translate(0.065, 0.05, -0.16001);
+  pupil2.matrix.scale(-0.045, 0.035, 0.07);
+  g_shapesList.push(pupil2);
+  
 }
 
 function main() {
@@ -192,7 +270,7 @@ function main() {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  buildRobot();
+  buildDragon();
 
   renderAllShapes();
 }
