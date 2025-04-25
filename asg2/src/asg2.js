@@ -143,13 +143,151 @@ function buildDragon(){
   let body = new Cube(bodyColor);
   body.matrix.translate(0, 0, 0);
   var bodyCoord = new Matrix4(body.matrix);
-  body.matrix.scale(0.46, 0.5, 0.46);
+  body.matrix.scale(0.46, 0.6, 0.46);
   g_shapesList.push(body);
+
+  let bodyCounter = new Cube(counterColor);
+  bodyCounter.matrix = new Matrix4(bodyCoord);
+  bodyCounter.matrix.translate(0, -0.13, -0.0301);
+  bodyCounter.matrix.scale(0.4509, 0.5, 0.52);
+  g_shapesList.push(bodyCounter);
+
+  //Charizard arms
+
+  //left arm
+  let leftArm = new Cube(bodyColor);
+  leftArm.matrix = new Matrix4(bodyCoord);
+  leftArm.matrix.translate(-0.34, 0.2, 0);
+  var leftArmCoord = new Matrix4(leftArm.matrix);
+  leftArm.matrix.scale(0.23, 0.10, 0.10);
+  g_shapesList.push(leftArm);
+
+  let leftforearm = new Cube(bodyColor);
+  leftforearm.matrix = new Matrix4(leftArmCoord);
+  leftforearm.matrix.translate(-0.078, 0, -0.07);
+  var leftforearmCoord = new Matrix4(leftforearm.matrix);
+  leftforearm.matrix.scale(0.10, 0.10, 0.23)
+  g_shapesList.push(leftforearm);
+
+  //left hand
+  let leftpalm = new Cube(bodyColor);
+  leftpalm.matrix = new Matrix4(leftforearmCoord);
+  leftpalm.matrix.translate(0, 0, -0.1);
+  var leftpalmCoord = new Matrix4(leftpalm.matrix);
+  leftpalm.matrix.scale(0.20, 0.15, 0.05)
+  g_shapesList.push(leftpalm);
+
+  let leftknuckles = new Cube(bodyColor);
+  leftknuckles.matrix = new Matrix4(leftpalmCoord);
+  leftknuckles.matrix.translate(0, 0.05, -0.05);
+  leftknuckles.matrix.scale(0.2, 0.05, 0.08);
+  g_shapesList.push(leftknuckles) 
+
+  let leftfinger1 = new Cube(bodyColor);
+  leftfinger1.matrix = new Matrix4(leftpalmCoord);
+  leftfinger1.matrix.translate(-0.07, 0.022, -0.07);
+  leftfinger1.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(leftfinger1)
+
+  let leftfinger2 = new Cube(bodyColor);
+  leftfinger2.matrix = new Matrix4(leftpalmCoord);
+  leftfinger2.matrix.translate(0, 0.022, -0.08);
+  leftfinger2.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(leftfinger2)
+
+  let leftfinger3 = new Cube(bodyColor);
+  leftfinger3.matrix = new Matrix4(leftpalmCoord);
+  leftfinger3.matrix.translate(0.07, 0.022, -0.07);
+  leftfinger3.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(leftfinger3)
+
+  let leftnail1 = new Cube(caColor);
+  leftnail1.matrix = new Matrix4(leftpalmCoord);
+  leftnail1.matrix.translate(-0.07, -0.03, -0.07);
+  leftnail1.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(leftnail1)
+
+  let leftnail2 = new Cube(caColor);
+  leftnail2.matrix = new Matrix4(leftpalmCoord);
+  leftnail2.matrix.translate(0, -0.03, -0.08);
+  leftnail2.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(leftnail2)
+
+  let leftnail3 = new Cube(caColor);
+  leftnail3.matrix = new Matrix4(leftpalmCoord);
+  leftnail3.matrix.translate(0.07, -0.03, -0.07);
+  leftnail3.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(leftnail3)
+
+  //right arm 
+  let rightArm = new Cube(bodyColor);
+  rightArm.matrix = new Matrix4(bodyCoord);
+  rightArm.matrix.translate(0.34, 0.2, 0);
+  var rightArmCoord = new Matrix4(rightArm.matrix);
+  rightArm.matrix.scale(0.23, 0.10, 0.10);
+  g_shapesList.push(rightArm);
+
+  let forearm = new Cube(bodyColor);
+  forearm.matrix = new Matrix4(rightArmCoord);
+  forearm.matrix.translate(0.078, 0, -0.07);
+  var forearmCoord = new Matrix4(forearm.matrix);
+  forearm.matrix.scale(0.10, 0.10, 0.23)
+  g_shapesList.push(forearm);
+
+  //right hand
+  let rightpalm = new Cube(bodyColor);
+  rightpalm.matrix = new Matrix4(forearmCoord);
+  rightpalm.matrix.translate(0, 0, -0.1);
+  var rightpalmCoord = new Matrix4(rightpalm.matrix);
+  rightpalm.matrix.scale(0.20, 0.15, 0.05)
+  g_shapesList.push(rightpalm);
+
+  let rightknuckles = new Cube(bodyColor);
+  rightknuckles.matrix = new Matrix4(rightpalmCoord);
+  rightknuckles.matrix.translate(0, 0.05, -0.05);
+  rightknuckles.matrix.scale(0.2, 0.05, 0.08);
+  g_shapesList.push(rightknuckles) 
+
+  let finger1 = new Cube(bodyColor);
+  finger1.matrix = new Matrix4(rightpalmCoord);
+  finger1.matrix.translate(-0.07, 0.022, -0.07);
+  finger1.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(finger1)
+
+  let rightfinger2 = new Cube(bodyColor);
+  rightfinger2.matrix = new Matrix4(rightpalmCoord);
+  rightfinger2.matrix.translate(0, 0.022, -0.08);
+  rightfinger2.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(rightfinger2)
+
+  let rightfinger3 = new Cube(bodyColor);
+  rightfinger3.matrix = new Matrix4(rightpalmCoord);
+  rightfinger3.matrix.translate(0.07, 0.022, -0.07);
+  rightfinger3.matrix.scale(0.05, 0.1, 0.05);
+  g_shapesList.push(rightfinger3)
+
+  let rightnail1 = new Cube(caColor);
+  rightnail1.matrix = new Matrix4(rightpalmCoord);
+  rightnail1.matrix.translate(-0.07, -0.03, -0.07);
+  rightnail1.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(rightnail1)
+
+  let rightnail2 = new Cube(caColor);
+  rightnail2.matrix = new Matrix4(rightpalmCoord);
+  rightnail2.matrix.translate(0, -0.03, -0.08);
+  rightnail2.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(rightnail2)
+
+  let rightnail3 = new Cube(caColor);
+  rightnail3.matrix = new Matrix4(rightpalmCoord);
+  rightnail3.matrix.translate(0.07, -0.03, -0.07);
+  rightnail3.matrix.scale(0.051, 0.051, 0.0501);
+  g_shapesList.push(rightnail3)
 
   //Charizard neck
   let neck = new Cube(bodyColor);
   neck.matrix = bodyCoord;
-  neck.matrix.translate(0, 0.3, 0);
+  neck.matrix.translate(0, 0.35, 0);
   var neckCoord = new Matrix4(neck.matrix);
   neck.matrix.scale(0.2, 0.2, 0.2);
   g_shapesList.push(neck);
@@ -256,17 +394,16 @@ function buildDragon(){
 
   let pupil1 = new TriPrism(pupilColor);
   pupil1.matrix = new Matrix4(headCoord);
-  pupil1.matrix.translate(-0.065, 0.05, -0.16001);
+  pupil1.matrix.translate(-0.065, 0.05, -0.1601);
   pupil1.matrix.scale(0.045, 0.035, 0.07);
   g_shapesList.push(pupil1);
 
   let pupil2 = new TriPrism(pupilColor);
   pupil2.matrix = new Matrix4(headCoord);
-  pupil2.matrix.translate(0.065, 0.05, -0.16001);
+  pupil2.matrix.translate(0.065, 0.05, -0.1601);
   pupil2.matrix.scale(-0.045, 0.035, 0.07);
   g_shapesList.push(pupil2);
 
-  //Charizard Body
 
 }
 
