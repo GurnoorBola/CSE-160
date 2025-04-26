@@ -137,6 +137,7 @@ function buildDragon(){
   let tongueColor = [168,120,146];
   let counterColor = [250,238,178];
   let pupilColor = [49,44,32];
+  let nostrilColor = [49,44,32];
   let eyeWhiteColor = [248, 245, 250];
 
   //Charizard Body
@@ -151,6 +152,201 @@ function buildDragon(){
   bodyCounter.matrix.translate(0, -0.13, -0.0301);
   bodyCounter.matrix.scale(0.4509, 0.5, 0.52);
   g_shapesList.push(bodyCounter);
+
+  //Charizard Wings
+  let leftinnerWing = new Cube(bodyColor);
+  leftinnerWing.matrix = new Matrix4(bodyCoord);
+  leftinnerWing.matrix.translate(-0.18, 0.18, 0.26);
+  var leftinnerWingCoord = new Matrix4(leftinnerWing.matrix);
+  leftinnerWing.matrix.scale(0.08, 0.35, 0.08)
+  g_shapesList.push(leftinnerWing);
+
+  let lefttopWing1 = new Cube(bodyColor);
+  lefttopWing1.matrix = new Matrix4(leftinnerWingCoord);
+  lefttopWing1.matrix.translate(-0.059, 0.15, 0);
+  lefttopWing1.matrix.scale(0.20, 0.08, 0.08)
+  g_shapesList.push(lefttopWing1);
+
+  let lefttopWing2 = new Cube(bodyColor);
+  lefttopWing2.matrix = new Matrix4(leftinnerWingCoord);
+  lefttopWing2.matrix.translate(-0.18, 0.31, 0);
+  lefttopWing2.matrix.scale(0.08, 0.40, 0.08)
+  g_shapesList.push(lefttopWing2);
+
+  let leftWingHorn = new Cube(bodyColor);
+  leftWingHorn.matrix = new Matrix4(leftinnerWingCoord);
+  leftWingHorn.matrix.translate(-0.18, 0.56, 0);
+  leftWingHorn.matrix.scale(0.05, 0.06, 0.05)
+  g_shapesList.push(leftWingHorn);
+
+  let lefttopWing3 = new Cube(bodyColor);
+  lefttopWing3.matrix = new Matrix4(leftinnerWingCoord);
+  lefttopWing3.matrix.translate(-0.428, 0.5, 0);
+  lefttopWing3.matrix.scale(0.58, 0.08, 0.08)
+  g_shapesList.push(lefttopWing3);
+
+  let leftWing1 = new Cube(wingColor);
+  leftWing1.matrix = new Matrix4(leftinnerWingCoord);
+  leftWing1.matrix.translate(-0.415, 0.18, 0);
+  leftWing1.matrix.scale(0.5, 0.58, 0.04);
+  var leftWing1Coord = new Matrix4(leftWing1.matrix);
+  g_shapesList.push(leftWing1);
+
+  let leftWingBack1 = new Cube(bodyColor);
+  leftWingBack1.matrix = new Matrix4(leftWing1Coord);
+  leftWingBack1.matrix.translate(-0.035, 0.001, 0.001);
+  g_shapesList.push(leftWingBack1);
+
+  let leftWing2 = new Cube(wingColor);
+  leftWing2.matrix = new Matrix4(leftinnerWingCoord);
+  leftWing2.matrix.translate(-0.15, 0, 0);
+  leftWing2.matrix.scale(0.23, 0.22, 0.04)
+  var leftWing2Coord = new Matrix4(leftWing2.matrix);
+  g_shapesList.push(leftWing2);
+
+  let leftWingBack2 = new Cube(bodyColor);
+  leftWingBack2.matrix = new Matrix4(leftWing2Coord);
+  leftWingBack2.matrix.scale(1.15, 1, 1);
+  leftWingBack2.matrix.translate(0, 0.001, 0.001);
+  g_shapesList.push(leftWingBack2);
+
+  let leftWing3 = new Cube(wingColor);
+  leftWing3.matrix = new Matrix4(leftinnerWingCoord);
+  leftWing3.matrix.translate(-0.061, -0.066, 0);
+  leftWing3.matrix.scale(0.2, 0.22, 0.04)
+  var leftWing3Coord = new Matrix4(leftWing3.matrix);
+  g_shapesList.push(leftWing3);
+
+  let leftWingBack3 = new Cube(bodyColor);
+  leftWingBack3.matrix = new Matrix4(leftWing3Coord);
+  leftWingBack3.matrix.scale(0.999, 0.999, 0.999);
+  leftWingBack3.matrix.translate(0, 0, 0.002);
+  g_shapesList.push(leftWingBack3);
+
+  let leftWing4 = new Cube(wingColor);
+  leftWing4.matrix = new Matrix4(leftinnerWingCoord);
+  leftWing4.matrix.translate(-0.37, -0.13, 0);
+  leftWing4.matrix.scale(0.2, 0.17, 0.04)
+  var leftWing4Coord = new Matrix4(leftWing4.matrix);
+  g_shapesList.push(leftWing4);
+
+  let leftWingBack4 = new Cube(bodyColor);
+  leftWingBack4.matrix = new Matrix4(leftWing4Coord);
+  leftWingBack4.matrix.scale(0.999, 0.999, 0.999);
+  leftWingBack4.matrix.translate(0, 0, 0.002);
+  g_shapesList.push(leftWingBack4);
+
+  let leftWing5 = new Cube(wingColor);
+  leftWing5.matrix = new Matrix4(leftinnerWingCoord);
+  leftWing5.matrix.translate(-0.625, -0.18, 0);
+  leftWing5.matrix.scale(0.08, 0.18, 0.04)
+  var leftWing5Coord = new Matrix4(leftWing5.matrix);
+  g_shapesList.push(leftWing5);
+
+  let leftWingBack5 = new Cube(bodyColor);
+  leftWingBack5.matrix = new Matrix4(leftWing5Coord);
+  leftWingBack5.matrix.scale(1.2, 0.999, 0.999);
+  leftWingBack5.matrix.translate(-0.1, 0, 0.002);
+  g_shapesList.push(leftWingBack5);
+
+
+  //right wing
+  let rightinnerWing = new Cube(bodyColor);
+  rightinnerWing.matrix = new Matrix4(bodyCoord);
+  rightinnerWing.matrix.translate(0.18, 0.18, 0.26);
+  rightinnerWing.matrix.scale(-1, 1, 1);
+  var rightinnerWingCoord = new Matrix4(rightinnerWing.matrix);
+  rightinnerWing.matrix.scale(0.08, 0.35, 0.08)
+  g_shapesList.push(rightinnerWing);
+
+  let righttopWing1 = new Cube(bodyColor);
+  righttopWing1.matrix = new Matrix4(rightinnerWingCoord);
+  righttopWing1.matrix.translate(-0.059, 0.15, 0);
+  righttopWing1.matrix.scale(0.20, 0.08, 0.08)
+  g_shapesList.push(righttopWing1);
+
+  let righttopWing2 = new Cube(bodyColor);
+  righttopWing2.matrix = new Matrix4(rightinnerWingCoord);
+  righttopWing2.matrix.translate(-0.18, 0.31, 0);
+  righttopWing2.matrix.scale(0.08, 0.40, 0.08)
+  g_shapesList.push(righttopWing2);
+
+  let rightWingHorn = new Cube(bodyColor);
+  rightWingHorn.matrix = new Matrix4(rightinnerWingCoord);
+  rightWingHorn.matrix.translate(-0.18, 0.56, 0);
+  rightWingHorn.matrix.scale(0.05, 0.06, 0.05)
+  g_shapesList.push(rightWingHorn);
+
+  let righttopWing3 = new Cube(bodyColor);
+  righttopWing3.matrix = new Matrix4(rightinnerWingCoord);
+  righttopWing3.matrix.translate(-0.428, 0.5, 0);
+  righttopWing3.matrix.scale(0.58, 0.08, 0.08)
+  g_shapesList.push(righttopWing3);
+
+  let rightWing1 = new Cube(wingColor);
+  rightWing1.matrix = new Matrix4(rightinnerWingCoord);
+  rightWing1.matrix.translate(-0.415, 0.18, 0);
+  rightWing1.matrix.scale(0.5, 0.58, 0.04);
+  var rightWing1Coord = new Matrix4(rightWing1.matrix);
+  g_shapesList.push(rightWing1);
+
+  let rightWingBack1 = new Cube(bodyColor);
+  rightWingBack1.matrix = new Matrix4(rightWing1Coord);
+  rightWingBack1.matrix.translate(-0.035, 0.001, 0.001);
+  g_shapesList.push(rightWingBack1);
+
+  let rightWing2 = new Cube(wingColor);
+  rightWing2.matrix = new Matrix4(rightinnerWingCoord);
+  rightWing2.matrix.translate(-0.15, 0, 0);
+  rightWing2.matrix.scale(0.23, 0.22, 0.04)
+  var rightWing2Coord = new Matrix4(rightWing2.matrix);
+  g_shapesList.push(rightWing2);
+
+  let rightWingBack2 = new Cube(bodyColor);
+  rightWingBack2.matrix = new Matrix4(rightWing2Coord);
+  rightWingBack2.matrix.scale(1.15, 1, 1);
+  rightWingBack2.matrix.translate(0, 0.001, 0.001);
+  g_shapesList.push(rightWingBack2);
+
+  let rightWing3 = new Cube(wingColor);
+  rightWing3.matrix = new Matrix4(rightinnerWingCoord);
+  rightWing3.matrix.translate(-0.061, -0.066, 0);
+  rightWing3.matrix.scale(0.2, 0.22, 0.04)
+  var rightWing3Coord = new Matrix4(rightWing3.matrix);
+  g_shapesList.push(rightWing3);
+
+  let rightWingBack3 = new Cube(bodyColor);
+  rightWingBack3.matrix = new Matrix4(rightWing3Coord);
+  rightWingBack3.matrix.scale(0.999, 0.999, 0.999);
+  rightWingBack3.matrix.translate(0, 0, 0.002);
+  g_shapesList.push(rightWingBack3);
+
+  let rightWing4 = new Cube(wingColor);
+  rightWing4.matrix = new Matrix4(rightinnerWingCoord);
+  rightWing4.matrix.translate(-0.37, -0.13, 0);
+  rightWing4.matrix.scale(0.2, 0.17, 0.04)
+  var rightWing4Coord = new Matrix4(rightWing4.matrix);
+  g_shapesList.push(rightWing4);
+
+  let rightWingBack4 = new Cube(bodyColor);
+  rightWingBack4.matrix = new Matrix4(rightWing4Coord);
+  rightWingBack4.matrix.scale(0.999, 0.999, 0.999);
+  rightWingBack4.matrix.translate(0, 0, 0.002);
+  g_shapesList.push(rightWingBack4);
+
+  let rightWing5 = new Cube(wingColor);
+  rightWing5.matrix = new Matrix4(rightinnerWingCoord);
+  rightWing5.matrix.translate(-0.625, -0.18, 0);
+  rightWing5.matrix.scale(0.08, 0.18, 0.04)
+  var rightWing5Coord = new Matrix4(rightWing5.matrix);
+  g_shapesList.push(rightWing5);
+
+  let rightWingBack5 = new Cube(bodyColor);
+  rightWingBack5.matrix = new Matrix4(rightWing5Coord);
+  rightWingBack5.matrix.scale(1.2, 0.999, 0.999);
+  rightWingBack5.matrix.translate(-0.1, 0, 0.002);
+  g_shapesList.push(rightWingBack5);
+
 
   //Charizard Legs
 
@@ -448,13 +644,13 @@ function buildDragon(){
   ear2.matrix.scale(0.07, 0.18, 0.07);
   g_shapesList.push(ear2);
 
-  let nostril1 = new Cube(pupilColor);
+  let nostril1 = new Cube(nostrilColor);
   nostril1.matrix = new Matrix4(headCoord);
   nostril1.matrix.translate(-0.03, 0.021, -0.095);
   nostril1.matrix.scale(0.005, 0.02, 0.38);
   g_shapesList.push(nostril1);
 
-  let nostril2 = new Cube(pupilColor);
+  let nostril2 = new Cube(nostrilColor);
   nostril2.matrix = new Matrix4(headCoord);
   nostril2.matrix.translate(0.03, 0.021, -0.095);
   nostril2.matrix.scale(0.005, 0.02, 0.38);
