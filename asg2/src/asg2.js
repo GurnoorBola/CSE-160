@@ -152,6 +152,86 @@ function buildDragon(){
   bodyCounter.matrix.scale(0.4509, 0.5, 0.52);
   g_shapesList.push(bodyCounter);
 
+  //Charizard Legs
+
+  //left leg
+  let leftThigh = new Cube(bodyColor);
+  leftThigh.matrix = new Matrix4(bodyCoord);
+  leftThigh.matrix.translate(-0.2, -0.33, 0);
+  var leftThighCoord = new Matrix4(leftThigh.matrix);
+  leftThigh.matrix.rotate(12, 1, 0, 0)
+  leftThigh.matrix.scale(0.23, 0.3, 0.35);
+  g_shapesList.push(leftThigh);
+
+  let leftShin = new Cube(bodyColor);
+  leftShin.matrix = new Matrix4(leftThighCoord);
+  leftShin.matrix.translate(0, -0.17, -0.026);
+  leftShin.matrix.scale(0.23, 0.15, 0.35)
+  g_shapesList.push(leftShin);
+
+  let leftFoot = new Cube(bodyColor);
+  leftFoot.matrix = new Matrix4(leftThighCoord);
+  leftFoot.matrix.translate(0, -0.207, -0.10);
+  leftFoot.matrix.scale(0.23, 0.08, 0.30)
+  g_shapesList.push(leftFoot);
+
+  let leftToeNail1 = new Cube(caColor);
+  leftToeNail1.matrix = new Matrix4(leftThighCoord);
+  leftToeNail1.matrix.translate(-0.08, -0.207, -0.18);
+  leftToeNail1.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(leftToeNail1);
+
+  let leftToeNail2 = new Cube(caColor);
+  leftToeNail2.matrix = new Matrix4(leftThighCoord);
+  leftToeNail2.matrix.translate(0, -0.207, -0.18);
+  leftToeNail2.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(leftToeNail2);
+
+  let leftToeNail3 = new Cube(caColor);
+  leftToeNail3.matrix = new Matrix4(leftThighCoord);
+  leftToeNail3.matrix.translate(0.08, -0.207, -0.18);
+  leftToeNail3.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(leftToeNail3);
+
+  //Right Leg
+  let rightThigh = new Cube(bodyColor);
+  rightThigh.matrix = new Matrix4(bodyCoord);
+  rightThigh.matrix.translate(0.2, -0.33, 0);
+  var rightThighCoord = new Matrix4(rightThigh.matrix);
+  rightThigh.matrix.rotate(12, 1, 0, 0)
+  rightThigh.matrix.scale(0.23, 0.3, 0.35);
+  g_shapesList.push(rightThigh);
+
+  let rightShin = new Cube(bodyColor);
+  rightShin.matrix = new Matrix4(rightThighCoord);
+  rightShin.matrix.translate(0, -0.17, -0.026);
+  rightShin.matrix.scale(0.23, 0.15, 0.35)
+  g_shapesList.push(rightShin);
+
+  let rightFoot = new Cube(bodyColor);
+  rightFoot.matrix = new Matrix4(rightThighCoord);
+  rightFoot.matrix.translate(0, -0.207, -0.10);
+  rightFoot.matrix.scale(0.23, 0.08, 0.30)
+  g_shapesList.push(rightFoot);
+
+  let rightToeNail1 = new Cube(caColor);
+  rightToeNail1.matrix = new Matrix4(rightThighCoord);
+  rightToeNail1.matrix.translate(-0.08, -0.207, -0.18);
+  rightToeNail1.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(rightToeNail1);
+
+  let rightToeNail2 = new Cube(caColor);
+  rightToeNail2.matrix = new Matrix4(rightThighCoord);
+  rightToeNail2.matrix.translate(0, -0.207, -0.18);
+  rightToeNail2.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(rightToeNail2);
+
+  let rightToeNail3 = new Cube(caColor);
+  rightToeNail3.matrix = new Matrix4(rightThighCoord);
+  rightToeNail3.matrix.translate(0.08, -0.207, -0.18);
+  rightToeNail3.matrix.scale(0.06, 0.06, 0.25)
+  g_shapesList.push(rightToeNail3);
+
   //Charizard arms
 
   //left arm
