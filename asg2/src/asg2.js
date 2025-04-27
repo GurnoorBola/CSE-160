@@ -23,6 +23,8 @@ let canvas;
 let gl;
 let g_globalAngleX = 0;
 let g_globalAngleY = 0;
+let g_globalRotateMatrix;
+let g_trackballRotationMatrix = new Matrix4();
 let a_Position;
 let a_Color;
 let u_ModelMatrix;
@@ -86,6 +88,7 @@ const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
 
+let isDragging = false;
 
 //set up actions for the HTML UI elements
 function addActionsForHTML(){
@@ -96,6 +99,48 @@ function addActionsForHTML(){
   var camAngleY = document.getElementById('camAngleY');
 
   camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; renderAllShapes()});
+
+  canvas = document.getElementById('webgl');
+
+  document.getElementById('camReset').onclick = function(){g_globalRotateMatrix = new Matrix4(); g_globalAngleX = 0; g_globalAngleY = 0; g_trackballRotationMatrix = new Matrix4(); renderAllShapes();};
+
+  canvas.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    startX = (e.clientX / canvas.width) * 2 - 1;
+    startY = (1 - e.clientY / canvas.height) * 2 - 1; 
+    startVec = projectToSphere(startX, startY);
+  });
+  
+  canvas.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+  
+    let currX = (e.clientX / canvas.width) * 2 - 1;
+    let currY = (1 - e.clientY / canvas.height) * 2 - 1;
+    let currVec = projectToSphere(currX, currY);
+  
+    let axis = [
+        startVec[1] * currVec[2] - startVec[2] * currVec[1],
+        startVec[2] * currVec[0] - startVec[0] * currVec[2],
+        startVec[0] * currVec[1] - startVec[1] * currVec[0],
+    ];
+
+    axis = [-axis[0], -axis[1], -axis[2]];
+  
+    let dot = startVec[0]*currVec[0] + startVec[1]*currVec[1] + startVec[2]*currVec[2];
+    let angle = Math.acos(Math.min(1, Math.max(-1, dot)));
+
+    var sensitivity = 2;
+  
+    rotateModel(angle * sensitivity, axis);
+
+    renderAllShapes();
+  
+    startVec = currVec;
+  });
+  
+  canvas.addEventListener('mouseup', function(e) {
+    isDragging = false;
+  });
 }
 
 var g_shapesList = [];
@@ -105,8 +150,12 @@ function renderAllShapes(){
 
     //check the time at the start of this function
     var startTime = performance.now();
-
-    var globalRotMat=new Matrix4().rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0);
+    var globalRotMat;
+    if (isDragging){
+      globalRotMat=g_trackballRotationMatrix;
+    } else {
+      globalRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0);
+    }
     gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
     // Clear <canvas>
@@ -128,6 +177,24 @@ function sendTextToHTML(text, htmlID){
     console.log('Failed to get ' + htmlID + " from HTML");
   }
   htmlElm.innerHTML = text;
+}
+
+function projectToSphere(x, y, radius = 1.0) {
+  let d = Math.sqrt(x * x + y * y);
+  let z;
+  if (d < radius * Math.sqrt(0.5)) {
+      z = Math.sqrt(radius * radius - d * d);
+  } else {
+      let t = radius / Math.sqrt(2.0);
+      z = t * t / d;
+  }
+  return [x, y, z];
+}
+
+function rotateModel(angle, axis) {
+  let rotationMatrix = new Matrix4();
+  rotationMatrix.setRotate(angle * 180 / Math.PI, axis[0], axis[1], axis[2]); 
+  g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix); 
 }
 
 function buildDragon(){
