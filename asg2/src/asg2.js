@@ -139,6 +139,8 @@ function buildDragon(){
   let pupilColor = [49,44,32];
   let nostrilColor = [49,44,32];
   let eyeWhiteColor = [248, 245, 250];
+  let flameColor = [238,86,51];
+  let flameComplimentColor = [252,251,119];
 
   //Charizard Body
   let body = new Cube(bodyColor);
@@ -152,6 +154,77 @@ function buildDragon(){
   bodyCounter.matrix.translate(0, -0.13, -0.0301);
   bodyCounter.matrix.scale(0.4509, 0.5, 0.52);
   g_shapesList.push(bodyCounter);
+
+  //Charizard Tail
+  let backTail = new Cube(bodyColor);
+  backTail.matrix = new Matrix4(bodyCoord);
+  backTail.matrix.translate(0, -0.19, 0.4)
+  let backTailCoord = new Matrix4(backTail.matrix);
+  backTail.matrix.scale(0.2301, 0.2301, 0.6001)
+  g_shapesList.push(backTail);
+
+  let backTailCounter = new Cube(counterColor);
+  backTailCounter.matrix = new Matrix4(backTailCoord);
+  backTailCounter.matrix.translate(0, -0.07, 0)
+  backTailCounter.matrix.scale(0.23, 0.23, 0.6)
+  g_shapesList.push(backTailCounter);
+
+  let tailJoint = new Cube(caColor);
+  tailJoint.matrix = new Matrix4(backTailCoord);
+  tailJoint.matrix.translate(0, 0, 0.24)
+  //Rotate tail joint
+  tailJoint.matrix.rotate(0, 1, 0, 0);
+  let tailJointCoord = new Matrix4(tailJoint.matrix);
+  tailJoint.matrix.scale(0.1, 0.1, 0.1);
+  g_shapesList.push(tailJoint);
+
+  let upperTail = new Cube(bodyColor);
+  upperTail.matrix = new Matrix4(tailJointCoord);
+  upperTail.matrix.translate(0, 0.185, 0)
+  let upperTailCoord = new Matrix4(upperTail.matrix);
+  upperTail.matrix.scale(0.2301, 0.6001, 0.2301)
+  g_shapesList.push(upperTail);
+
+  let upperTailCounter = new Cube(counterColor);
+  upperTailCounter.matrix = new Matrix4(upperTailCoord);
+  upperTailCounter.matrix.translate(0, -0.07, 0.07)
+  upperTailCounter.matrix.scale(0.23, 0.6, 0.23)
+  g_shapesList.push(upperTailCounter);
+
+  //charizard flame
+  let flameJoint = new Cube(caColor);
+  flameJoint.matrix = new Matrix4(upperTailCoord);
+  flameJoint.matrix.translate(0, 0.24, 0);
+  flameJoint.matrix.rotate(0, 1, 0, 0);
+  let falmeJointCoord = new Matrix4(flameJoint.matrix);
+  flameJoint.matrix.scale(0.1, 0.1, 0.1);
+  g_shapesList.push(flameJoint);
+
+  let flameBase = new Cube(flameComplimentColor);
+  flameBase.matrix = new Matrix4(falmeJointCoord);
+  flameBase.matrix.translate(0, 0.15, 0);
+  flameBase.matrix.scale(0.28, 0.15, 0.28);
+  g_shapesList.push(flameBase);
+
+  let flameTop1 = new Cube(flameColor);
+  flameTop1.matrix = new Matrix4(falmeJointCoord);
+  flameTop1.matrix.translate(0, 0.190, 0);
+  flameTop1.matrix.scale(0.2801, 0.0701, 0.2801);
+  g_shapesList.push(flameTop1);
+
+  let flameTop2 = new Cube(flameColor);
+  flameTop2.matrix = new Matrix4(falmeJointCoord);
+  flameTop2.matrix.translate(0, 0.250, 0);
+  flameTop2.matrix.scale(0.2201, 0.0701, 0.2201);
+  g_shapesList.push(flameTop2);
+
+  let flameTop3 = new Cube(flameColor);
+  flameTop3.matrix = new Matrix4(falmeJointCoord);
+  flameTop3.matrix.translate(0, 0.320, 0);
+  flameTop3.matrix.scale(0.1501, 0.0701, 0.1501);
+  g_shapesList.push(flameTop3);
+
+
 
   //Charizard Wings
   let leftinnerWing = new Cube(bodyColor);
@@ -434,6 +507,8 @@ function buildDragon(){
   let leftArm = new Cube(bodyColor);
   leftArm.matrix = new Matrix4(bodyCoord);
   leftArm.matrix.translate(-0.34, 0.2, 0);
+  //rotate left arm
+  leftArm.matrix.rotate(0, 1, 0, 0)  
   var leftArmCoord = new Matrix4(leftArm.matrix);
   leftArm.matrix.scale(0.23, 0.10, 0.10);
   g_shapesList.push(leftArm);
@@ -498,6 +573,8 @@ function buildDragon(){
   //right arm 
   let rightArm = new Cube(bodyColor);
   rightArm.matrix = new Matrix4(bodyCoord);
+  //rotate right arm
+  rightArm.matrix.rotate(0, 1, 0, 0)  
   rightArm.matrix.translate(0.34, 0.2, 0);
   var rightArmCoord = new Matrix4(rightArm.matrix);
   rightArm.matrix.scale(0.23, 0.10, 0.10);
