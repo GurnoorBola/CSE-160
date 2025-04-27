@@ -3,10 +3,10 @@ var VSHADER_SOURCE = `
   attribute vec4 a_Position;
   attribute vec4 a_Color;
   uniform mat4 u_ModelMatrix;
-  uniform mat4 u_GlobalRotateMatrix;
+  uniform mat4 u_GlobalTransformMatrix;
   varying vec4 v_Color;
   void main() {
-    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+    gl_Position = u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
     v_Color = a_Color;
   }`
 
@@ -23,12 +23,12 @@ let canvas;
 let gl;
 let g_globalAngleX = 0;
 let g_globalAngleY = 0;
-let g_globalRotateMatrix;
+let g_globalTransformMatrix = new Matrix4();
 let g_trackballRotationMatrix = new Matrix4();
 let a_Position;
 let a_Color;
 let u_ModelMatrix;
-let u_GlobalRotateMatrix;
+let u_GlobalTransformMatrix;
 
 let isDrawing = true;
 
@@ -76,9 +76,9 @@ function connectVariablesToGLSL(){
   }
 
   //Get the storage location of u_GlobalRotateMatrix
-  u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
-  if (!u_GlobalRotateMatrix) {
-    console.log('Failed to get the storage location of u_ModelMatrix');
+  u_GlobalTransformMatrix = gl.getUniformLocation(gl.program, 'u_GlobalTransformMatrix');
+  if (!u_GlobalTransformMatrix) {
+    console.log('Failed to get the storage location of u_GlobalTransformMatrix');
     return;
   }
 }
@@ -90,6 +90,8 @@ const CIRCLE = 2;
 
 let isDragging = false;
 
+
+let tailSlider1, tailSlider2, tailSlider3;
 //set up actions for the HTML UI elements
 function addActionsForHTML(){
   var camAngleX = document.getElementById('camAngleX');
@@ -100,6 +102,15 @@ function addActionsForHTML(){
 
   camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
 
+  tailSlider1 = document.getElementById('tailJoint1');
+  tailSlider1.addEventListener('input', function(){backTailRotate = tailSlider1.value; calculateDragon();});
+
+  tailSlider2 = document.getElementById('tailJoint2');
+  tailSlider2.addEventListener('input', function(){tailJointRotate = tailSlider2.value; calculateDragon();});
+
+  tailSlider3 = document.getElementById('tailJoint3');
+  tailSlider3.addEventListener('input', function(){flameJointRotate = tailSlider3.value; calculateDragon();});
+  
   canvas = document.getElementById('webgl');
 
   document.getElementById('Color1').onclick = function(){
@@ -135,11 +146,22 @@ function addActionsForHTML(){
   };
 
 
-  document.getElementById('camReset').onclick = function(){g_globalRotateMatrix = new Matrix4(); g_globalAngleX = 0; g_globalAngleY = 0; g_trackballRotationMatrix = new Matrix4(); renderAllShapes();};
-
+  document.getElementById('camReset').onclick = function(){resetCamera();};
+  document.getElementById('jointReset').onclick = function(){resetSliders(); calculateDragon();}
   document.getElementById('startAnimate').onclick = function(){happy = false; bodyRotate = 10; bodyTranslate = -0.2; walking = true;};
   document.getElementById('stopAnimate').onclick = function(){stopWalk()};
-    
+
+  canvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    let scaleFactor = 1;
+    if (e.deltaY > 0) {
+      scaleFactor = 0.95;
+    } else {
+      scaleFactor = 1.05;
+    }
+    g_globalTransformMatrix.scale(scaleFactor, scaleFactor, scaleFactor);
+  })
+
   canvas.addEventListener('mousedown', function(e) {
     if (e.shiftKey) {
       secretAnimationStart = performance.now()/1000.0; stopWalk(); happy = true;
@@ -191,9 +213,9 @@ function renderAllShapes(){
 
     //check the time at the start of this function
     var startTime = performance.now();
-    var globalRotMat;
-    globalRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
-    gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+    var globalTransformMat;
+    globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
+    gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
 
     if (walking && !happy){
       g_shapesList = [];
@@ -266,6 +288,9 @@ let walking = false;
 let happy = false;
 let bodyRotate = 10;
 let bodyTranslate = -0.2; 
+let backTailRotate = 0;
+let tailJointRotate = 0;
+let flameJointRotate = 0;
 let jointTranslate = 0;
 let leftWingTranslate= 0;
 let rightWingTranslate = 0;
@@ -276,6 +301,7 @@ let rightArmRotate = 0;
 let neckRotate = 0;
 function animateWalk(){
   walking = true;
+  resetSliders();
   jointTranslate = 0.012*Math.cos(2*g_seconds);
   leftWingTranslate = 0.03*Math.cos(-3.5*g_seconds);
   rightWingTranslate= -0.03*Math.cos(3.5*g_seconds);
@@ -284,10 +310,23 @@ function animateWalk(){
   leftArmRotate = -20*Math.cos(3.5*g_seconds);
   rightArmRotate = 20*Math.cos(3.5*g_seconds)
   neckRotate = 5*Math.cos(5*g_seconds)
+  flameJointRotate = 360*g_seconds/5;
 }
 
 function stopWalk(){
   walking = false;
+  resetSliders();
+  g_shapesList = [];
+  calculateDragon();
+  renderAllShapes();
+}
+
+function resetSliders(){
+  bodyRotate = 10;
+  bodyTranslate = -0.2; 
+  backTailRotate = 0;
+  tailJointRotate = 0;
+  flameJointRotate = 0;
   jointTranslate = 0;
   leftWingTranslate= 0;
   rightWingTranslate = 0;
@@ -296,12 +335,23 @@ function stopWalk(){
   leftArmRotate = 0;
   rightArmRotate = 0;
   neckRotate = 0;
-  g_shapesList = [];
-  calculateDragon();
+  tailSlider1.value = 0;
+  tailSlider2.value = 0;
+  tailSlider3.value = 0;
+}
+
+function resetCamera(){
+  g_globalTransformMatrix = new Matrix4(); 
+  g_globalAngleX = 0; 
+  g_globalAngleY = 0; 
+  camAngleX.value = g_globalAngleX; 
+  camAngleY.value = g_globalAngleY; 
+  g_trackballRotationMatrix = new Matrix4(); 
   renderAllShapes();
 }
 
 function calculateDragon(){
+  g_shapesList = [];
   //Charizard Body
   body.matrix = new Matrix4();
   body.matrix.rotate(bodyRotate, 0, 1, 0);
@@ -318,6 +368,7 @@ function calculateDragon(){
   //Charizard Tail
   backTail.matrix = new Matrix4(bodyCoord);
   backTail.matrix.translate(0, -0.19, 0.4)
+  backTail.matrix.rotate(backTailRotate, 0, 0, 1);
   let backTailCoord = new Matrix4(backTail.matrix);
   backTail.matrix.scale(0.2301, 0.2301, 0.6001)
   g_shapesList.push(backTail);
@@ -330,7 +381,7 @@ function calculateDragon(){
   tailJoint.matrix = new Matrix4(backTailCoord);
   tailJoint.matrix.translate(0, 0, 0.24)
   //Rotate tail joint
-  tailJoint.matrix.rotate(0, 1, 0, 0);
+  tailJoint.matrix.rotate(tailJointRotate, 1, 0, 0);
   let tailJointCoord = new Matrix4(tailJoint.matrix);
   tailJoint.matrix.scale(0.1, 0.1, 0.1);
   g_shapesList.push(tailJoint);
@@ -350,6 +401,7 @@ function calculateDragon(){
   flameJoint.matrix = new Matrix4(upperTailCoord);
   flameJoint.matrix.translate(0, 0.24, 0);
   flameJoint.matrix.translate(0, jointTranslate, 0)
+  flameJoint.matrix.rotate(flameJointRotate, 0, 1, 0);
   flameJoint.matrix.rotate(0, 1, 0, 0);
   let falmeJointCoord = new Matrix4(flameJoint.matrix);
   flameJoint.matrix.scale(0.1, 0.1, 0.1);
@@ -1025,8 +1077,9 @@ function main() {
   //set up actions for the HTML UI elements
   addActionsForHTML();
 
+  resetSliders();
+  resetCamera();
   
-
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
