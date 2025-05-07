@@ -34,8 +34,6 @@ let u_Sampler0;
 let u_ModelMatrix;
 let u_GlobalTransformMatrix;
 
-let isDrawing = true;
-
 function setupWegbGL(){
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
@@ -129,14 +127,9 @@ function sendTextureToGLSL(image){
 }
 
 //Constants
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-
 let isDragging = false;
 
 
-let tailSlider1, tailSlider2, tailSlider3;
 //set up actions for the HTML UI elements
 function addActionsForHTML(){
   var camAngleX = document.getElementById('camAngleX');
@@ -146,55 +139,11 @@ function addActionsForHTML(){
   var camAngleY = document.getElementById('camAngleY');
 
   camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
-
-  tailSlider1 = document.getElementById('tailJoint1');
-  tailSlider1.addEventListener('input', function(){backTailRotate = tailSlider1.value;});
-
-  tailSlider2 = document.getElementById('tailJoint2');
-  tailSlider2.addEventListener('input', function(){tailJointRotate = tailSlider2.value; });
-
-  tailSlider3 = document.getElementById('tailJoint3');
-  tailSlider3.addEventListener('input', function(){flameJointRotate = tailSlider3.value;});
   
   canvas = document.getElementById('webgl');
 
-  document.getElementById('Color1').onclick = function(){
-    bodyColor = [249, 177, 101];
-    caColor = [213, 221, 221];
-    wingColor = [54, 147, 162];
-    tongueColor = [168, 120, 146];
-    counterColor = [250, 238, 178];
-    pupilColor = [49, 44, 32];
-    nostrilColor = [49, 44, 32];
-    eyeWhiteColor = [248, 245, 250];
-    flameColor = [238, 86, 51];
-    flameComplimentColor = [252, 251, 119];
-    buildDragon();
-    calculateDragon();
-    renderAllShapes();
-  };
-
-  document.getElementById('Color2').onclick = function(){
-    bodyColor = [135,125,151];
-    caColor = [213, 221, 221];
-    wingColor = [165,52,91];
-    tongueColor = [159,73,88];
-    counterColor = [250, 238, 178];
-    pupilColor = [165,52,91];
-    nostrilColor = [49, 44, 32];
-    eyeWhiteColor = [248, 245, 250];
-    flameColor = [238, 86, 51];
-    flameComplimentColor = [252, 251, 119];
-    buildDragon();
-    calculateDragon();
-    renderAllShapes();
-  };
-
 
   document.getElementById('camReset').onclick = function(){resetCamera();};
-  document.getElementById('jointReset').onclick = function(){resetSliders(); calculateDragon();}
-  document.getElementById('startAnimate').onclick = function(){happy = false; bodyRotate = 10; bodyTranslate = -0.2; walking = true;};
-  document.getElementById('stopAnimate').onclick = function(){stopWalk()};
 
   canvas.addEventListener('wheel', function(e) {
     e.preventDefault();
@@ -235,8 +184,6 @@ function addActionsForHTML(){
     var sensitivity = 2;
   
     rotateModel(angle * sensitivity, axis);
-
-    renderAllShapes();
   
     startVec = currVec;
   });
@@ -248,7 +195,6 @@ function addActionsForHTML(){
 
 var g_shapesList = [];
 
-let secretAnimationStart;
 //Draw every shape that is supposed to be in the canvas
 function renderAllShapes(){
 
@@ -257,25 +203,6 @@ function renderAllShapes(){
     var globalTransformMat;
     globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
     gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
-
-    if (walking && !happy){
-      g_shapesList = [];
-      animateWalk();
-      calculateDragon();  
-    }
-
-    if (happy && !walking){
-      let seconds = performance.now()/1000.0 - secretAnimationStart; 
-      if (seconds < 2){
-        g_shapesList = [];
-        bodyRotate = 10 + 360*seconds;
-        bodyTranslate = -0.2 + 0.2 * Math.abs(Math.sin(2*Math.PI*seconds));
-
-        calculateDragon();
-      } else {
-        happy = false;
-      }
-    }
     // Clear <canvas>
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -320,65 +247,9 @@ var g_seconds = performance.now()/1000.0-g_startTime;
 
 function tick(){
   g_seconds = performance.now()/1000.0-g_startTime;
-  console.log(g_seconds);
+  // console.log(g_seconds);
   renderAllShapes();
   requestAnimationFrame(tick);
-}
-
-let walking = false;
-let happy = false;
-let bodyRotate = 10;
-let bodyTranslate = -0.2; 
-let backTailRotate = 0;
-let tailJointRotate = 0;
-let flameJointRotate = 0;
-let jointTranslate = 0;
-let leftWingTranslate= 0;
-let rightWingTranslate = 0;
-let leftLegRotate = 0;
-let rightLegRotate = 0;
-let leftArmRotate = 0;
-let rightArmRotate = 0;
-let neckRotate = 0;
-function animateWalk(){
-  walking = true;
-  resetSliders();
-  jointTranslate = 0.012*Math.cos(2*g_seconds);
-  leftWingTranslate = 0.03*Math.cos(-3.5*g_seconds);
-  rightWingTranslate= -0.03*Math.cos(3.5*g_seconds);
-  leftLegRotate = 20*Math.sin(4*g_seconds);
-  rightLegRotate= 20*Math.sin(-4*g_seconds);
-  leftArmRotate = -20*Math.cos(3.5*g_seconds);
-  rightArmRotate = 20*Math.cos(3.5*g_seconds)
-  neckRotate = 5*Math.cos(5*g_seconds)
-  flameJointRotate = 360*g_seconds/5;
-}
-
-function stopWalk(){
-  walking = false;
-  resetSliders();
-  g_shapesList = [];
-  calculateDragon();
-  renderAllShapes();
-}
-
-function resetSliders(){
-  bodyRotate = 10;
-  bodyTranslate = -0.2; 
-  backTailRotate = 0;
-  tailJointRotate = 0;
-  flameJointRotate = 0;
-  jointTranslate = 0;
-  leftWingTranslate= 0;
-  rightWingTranslate = 0;
-  leftLegRotate = 0;
-  rightLegRotate = 0;
-  leftArmRotate = 0;
-  rightArmRotate = 0;
-  neckRotate = 0;
-  tailSlider1.value = 0;
-  tailSlider2.value = 0;
-  tailSlider3.value = 0;
 }
 
 function resetCamera(){
@@ -403,11 +274,11 @@ function main() {
   //set up actions for the HTML UI elements
   addActionsForHTML();
 
-  resetSliders();
   resetCamera();
 
   let cube = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
   g_shapesList.push(cube);
+  tick();
   
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
