@@ -8,7 +8,6 @@ var VSHADER_SOURCE = `
   void main() {
     gl_Position = u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
     v_UV = a_UV;
-    //v_Color = a_Color;
   }`
 
 // Fragment shader program
@@ -16,8 +15,11 @@ var FSHADER_SOURCE = `
   uniform sampler2D u_Sampler0;
   precision mediump float;
   varying vec2 v_UV;
+  uniform vec4 u_Color;
+  uniform float u_texColorWeight;
   void main() {
-    gl_FragColor = texture2D(u_Sampler0, v_UV);
+    float t = u_texColorWeight;
+    gl_FragColor = (1.0-t) * u_Color + t * texture2D(u_Sampler0, v_UV);
   }`
 
 // Global Variables
@@ -28,7 +30,8 @@ let g_globalAngleY = 0;
 let g_globalTransformMatrix = new Matrix4();
 let g_trackballRotationMatrix = new Matrix4();
 let a_Position;
-let a_Color;
+let u_Color;
+let u_texColorWeight;
 let a_UV;
 let u_Sampler0;
 let u_ModelMatrix;
@@ -63,10 +66,10 @@ function connectVariablesToGLSL(){
     return;
   }
 
-  // Get the storage location of u_FragColor
-  a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-  if (!a_Color) {
-    console.log('Failed to get the storage location of u_FragColor');
+  // Get the storage location of u_Color
+  u_Color = gl.getUniformLocation(gl.program, 'u_Color');
+  if (!u_Color) {
+    console.log('Failed to get the storage location of u_Color');
     return;
   }
 
@@ -81,6 +84,12 @@ function connectVariablesToGLSL(){
   u_GlobalTransformMatrix = gl.getUniformLocation(gl.program, 'u_GlobalTransformMatrix');
   if (!u_GlobalTransformMatrix) {
     console.log('Failed to get the storage location of u_GlobalTransformMatrix');
+    return;
+  }
+
+  u_texColorWeight = gl.getUniformLocation(gl.program, 'u_texColorWeight');
+  if (!u_texColorWeight){
+    console.log('Failed to get locaiton of u_texColorWeight');
     return;
   }
 
@@ -276,8 +285,15 @@ function main() {
 
   resetCamera();
 
-  let cube = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-  g_shapesList.push(cube);
+  let cube1 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
+  cube1.matrix.translate(-0.5, 0, 0);
+  cube1.matrix.scale(0.2, 0.2, 0.2)
+  g_shapesList.push(cube1);
+
+  let cube2 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
+  cube2.matrix.translate(0.5, 0, 0);
+  cube2.matrix.scale(0.2, 0.2, 0.2)
+  g_shapesList.push(cube2);
   tick();
   
   // Specify the color for clearing <canvas>

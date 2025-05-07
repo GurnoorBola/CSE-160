@@ -1,7 +1,8 @@
 class Cube{
-    constructor(uv){
+    constructor(uv, color=[1, 1, 1, 1], textureWeight=1.0){
         this.type='cube';
 
+        this.baseColor = color;
 
         var vertexUVBuffer = gl.createBuffer();
         if (!vertexUVBuffer) {
@@ -73,10 +74,17 @@ class Cube{
         //Write data into the buffer object
         gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW)
 
+        this.texColorWeight = textureWeight;
         this.matrix = new Matrix4();
     }
 
     render() {
+        //set color
+        var rgba = this.baseColor;
+        gl.uniform4f(u_Color, rgba[0], rgba[1], rgba[2], 1);
+
+        gl.uniform1f(u_texColorWeight, this.texColorWeight);
+
         gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);   
 
         var FSIZE = this.vertices.BYTES_PER_ELEMENT;
