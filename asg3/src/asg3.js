@@ -1,0 +1,417 @@
+// Vertex shader program
+var VSHADER_SOURCE = `
+  attribute vec4 a_Position;
+  attribute vec2 a_UV;
+  varying vec2 v_UV;
+  uniform mat4 u_ModelMatrix;
+  uniform mat4 u_GlobalTransformMatrix;
+  void main() {
+    gl_Position = u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
+    v_UV = a_UV;
+    //v_Color = a_Color;
+  }`
+
+// Fragment shader program
+var FSHADER_SOURCE = `
+  uniform sampler2D u_Sampler0;
+  precision mediump float;
+  varying vec2 v_UV;
+  void main() {
+    gl_FragColor = texture2D(u_Sampler0, v_UV);
+  }`
+
+// Global Variables
+let canvas;
+let gl;
+let g_globalAngleX = 0;
+let g_globalAngleY = 0;
+let g_globalTransformMatrix = new Matrix4();
+let g_trackballRotationMatrix = new Matrix4();
+let a_Position;
+let a_Color;
+let a_UV;
+let u_Sampler0;
+let u_ModelMatrix;
+let u_GlobalTransformMatrix;
+
+let isDrawing = true;
+
+function setupWegbGL(){
+  // Retrieve <canvas> element
+  canvas = document.getElementById('webgl');
+
+  // Get the rendering context for WebGL
+  gl = canvas.getContext('webgl', { preserveDrawingBuffer: true});
+  if (!gl) {
+    console.log('Failed to get the rendering context for WebGL');
+    return;
+  }
+  // gl.enable(gl.BLEND);
+  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.enable(gl.DEPTH_TEST);
+}
+
+function connectVariablesToGLSL(){
+  // Initialize shaders
+  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+    console.log('Failed to intialize shaders.');
+    return;
+  }
+
+  // // Get the storage location of a_Position
+  a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return;
+  }
+
+  // Get the storage location of u_FragColor
+  a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+  if (!a_Color) {
+    console.log('Failed to get the storage location of u_FragColor');
+    return;
+  }
+
+  //Get the storage location of u_ModelMatrix
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
+    return;
+  }
+
+  //Get the storage location of u_GlobalRotateMatrix
+  u_GlobalTransformMatrix = gl.getUniformLocation(gl.program, 'u_GlobalTransformMatrix');
+  if (!u_GlobalTransformMatrix) {
+    console.log('Failed to get the storage location of u_GlobalTransformMatrix');
+    return;
+  }
+
+  a_UV = gl.getAttribLocation(gl.program, 'a_UV');
+  if (!a_UV) {
+    console.log('Failed to get the storeage location of a_UV');
+    return;
+  }
+
+  u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+  if (!u_Sampler0) {
+    console.log('Failed to get the storeage location of u_Sampler0');
+    return false;
+  }
+}
+
+function initTextures(){
+  var image = new Image();
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+
+  image.onload = function() { sendTextureToGLSL(image); renderAllShapes();}
+  image.src = 'luckyblock.png';
+
+  return true;
+}
+
+function sendTextureToGLSL(image){
+  var texture = gl.createTexture();
+  if (!texture) {
+    console.log('Failed to create texture object');
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.uniform1i(u_Sampler0, 0);
+  console.log('finished loadTexture');
+}
+
+//Constants
+const POINT = 0;
+const TRIANGLE = 1;
+const CIRCLE = 2;
+
+let isDragging = false;
+
+
+let tailSlider1, tailSlider2, tailSlider3;
+//set up actions for the HTML UI elements
+function addActionsForHTML(){
+  var camAngleX = document.getElementById('camAngleX');
+
+  camAngleX.addEventListener('input', function() {g_globalAngleX = camAngleX.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
+
+  var camAngleY = document.getElementById('camAngleY');
+
+  camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
+
+  tailSlider1 = document.getElementById('tailJoint1');
+  tailSlider1.addEventListener('input', function(){backTailRotate = tailSlider1.value;});
+
+  tailSlider2 = document.getElementById('tailJoint2');
+  tailSlider2.addEventListener('input', function(){tailJointRotate = tailSlider2.value; });
+
+  tailSlider3 = document.getElementById('tailJoint3');
+  tailSlider3.addEventListener('input', function(){flameJointRotate = tailSlider3.value;});
+  
+  canvas = document.getElementById('webgl');
+
+  document.getElementById('Color1').onclick = function(){
+    bodyColor = [249, 177, 101];
+    caColor = [213, 221, 221];
+    wingColor = [54, 147, 162];
+    tongueColor = [168, 120, 146];
+    counterColor = [250, 238, 178];
+    pupilColor = [49, 44, 32];
+    nostrilColor = [49, 44, 32];
+    eyeWhiteColor = [248, 245, 250];
+    flameColor = [238, 86, 51];
+    flameComplimentColor = [252, 251, 119];
+    buildDragon();
+    calculateDragon();
+    renderAllShapes();
+  };
+
+  document.getElementById('Color2').onclick = function(){
+    bodyColor = [135,125,151];
+    caColor = [213, 221, 221];
+    wingColor = [165,52,91];
+    tongueColor = [159,73,88];
+    counterColor = [250, 238, 178];
+    pupilColor = [165,52,91];
+    nostrilColor = [49, 44, 32];
+    eyeWhiteColor = [248, 245, 250];
+    flameColor = [238, 86, 51];
+    flameComplimentColor = [252, 251, 119];
+    buildDragon();
+    calculateDragon();
+    renderAllShapes();
+  };
+
+
+  document.getElementById('camReset').onclick = function(){resetCamera();};
+  document.getElementById('jointReset').onclick = function(){resetSliders(); calculateDragon();}
+  document.getElementById('startAnimate').onclick = function(){happy = false; bodyRotate = 10; bodyTranslate = -0.2; walking = true;};
+  document.getElementById('stopAnimate').onclick = function(){stopWalk()};
+
+  canvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    let scaleFactor = 1;
+    if (e.deltaY > 0) {
+      scaleFactor = 0.95;
+    } else {
+      scaleFactor = 1.05;
+    }
+    g_globalTransformMatrix.scale(scaleFactor, scaleFactor, scaleFactor);
+  })
+
+  canvas.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    startX = (e.clientX / canvas.width) * 2 - 1;
+    startY = (1 - e.clientY / canvas.height) * 2 - 1; 
+    startVec = projectToSphere(startX, startY);
+  });
+  
+  canvas.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+  
+    let currX = (e.clientX / canvas.width) * 2 - 1;
+    let currY = (1 - e.clientY / canvas.height) * 2 - 1;
+    let currVec = projectToSphere(currX, currY);
+  
+    let axis = [
+        startVec[1] * currVec[2] - startVec[2] * currVec[1],
+        startVec[2] * currVec[0] - startVec[0] * currVec[2],
+        startVec[0] * currVec[1] - startVec[1] * currVec[0],
+    ];
+
+    axis = [-axis[0], -axis[1], -axis[2]];
+  
+    let dot = startVec[0]*currVec[0] + startVec[1]*currVec[1] + startVec[2]*currVec[2];
+    let angle = Math.acos(Math.min(1, Math.max(-1, dot)));
+
+    var sensitivity = 2;
+  
+    rotateModel(angle * sensitivity, axis);
+
+    renderAllShapes();
+  
+    startVec = currVec;
+  });
+  
+  canvas.addEventListener('mouseup', function(e) {
+    isDragging = false;
+  });
+}
+
+var g_shapesList = [];
+
+let secretAnimationStart;
+//Draw every shape that is supposed to be in the canvas
+function renderAllShapes(){
+
+    //check the time at the start of this function
+    var startTime = performance.now();
+    var globalTransformMat;
+    globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
+    gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
+
+    if (walking && !happy){
+      g_shapesList = [];
+      animateWalk();
+      calculateDragon();  
+    }
+
+    if (happy && !walking){
+      let seconds = performance.now()/1000.0 - secretAnimationStart; 
+      if (seconds < 2){
+        g_shapesList = [];
+        bodyRotate = 10 + 360*seconds;
+        bodyTranslate = -0.2 + 0.2 * Math.abs(Math.sin(2*Math.PI*seconds));
+
+        calculateDragon();
+      } else {
+        happy = false;
+      }
+    }
+    // Clear <canvas>
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // var len = g_points.length;
+    var len = g_shapesList.length;
+    for(var i = 0; i < len; i++) {
+      g_shapesList[i].render();
+    }
+
+    var duration = performance.now() - startTime;
+    sendTextToHTML('numdot: ' + len + ' ms: ' + Math.floor(duration) + ' fps: ' + Math.floor(10000/duration)/10, 'numdot');
+}
+
+function sendTextToHTML(text, htmlID){
+  var htmlElm = document.getElementById(htmlID);
+  if (!htmlElm) {
+    console.log('Failed to get ' + htmlID + " from HTML");
+  }
+  htmlElm.innerHTML = text;
+}
+
+function projectToSphere(x, y, radius = 1.0) {
+  let d = Math.sqrt(x * x + y * y);
+  let z;
+  if (d < radius * Math.sqrt(0.5)) {
+      z = Math.sqrt(radius * radius - d * d);
+  } else {
+      let t = radius / Math.sqrt(2.0);
+      z = t * t / d;
+  }
+  return [x, y, z];
+}
+
+function rotateModel(angle, axis) {
+  let rotationMatrix = new Matrix4();
+  rotationMatrix.setRotate(angle * 180 / Math.PI, axis[0], axis[1], axis[2]); 
+  g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix); 
+}
+
+var g_startTime = performance.now()/1000.0;
+var g_seconds = performance.now()/1000.0-g_startTime;
+
+function tick(){
+  g_seconds = performance.now()/1000.0-g_startTime;
+  console.log(g_seconds);
+  renderAllShapes();
+  requestAnimationFrame(tick);
+}
+
+let walking = false;
+let happy = false;
+let bodyRotate = 10;
+let bodyTranslate = -0.2; 
+let backTailRotate = 0;
+let tailJointRotate = 0;
+let flameJointRotate = 0;
+let jointTranslate = 0;
+let leftWingTranslate= 0;
+let rightWingTranslate = 0;
+let leftLegRotate = 0;
+let rightLegRotate = 0;
+let leftArmRotate = 0;
+let rightArmRotate = 0;
+let neckRotate = 0;
+function animateWalk(){
+  walking = true;
+  resetSliders();
+  jointTranslate = 0.012*Math.cos(2*g_seconds);
+  leftWingTranslate = 0.03*Math.cos(-3.5*g_seconds);
+  rightWingTranslate= -0.03*Math.cos(3.5*g_seconds);
+  leftLegRotate = 20*Math.sin(4*g_seconds);
+  rightLegRotate= 20*Math.sin(-4*g_seconds);
+  leftArmRotate = -20*Math.cos(3.5*g_seconds);
+  rightArmRotate = 20*Math.cos(3.5*g_seconds)
+  neckRotate = 5*Math.cos(5*g_seconds)
+  flameJointRotate = 360*g_seconds/5;
+}
+
+function stopWalk(){
+  walking = false;
+  resetSliders();
+  g_shapesList = [];
+  calculateDragon();
+  renderAllShapes();
+}
+
+function resetSliders(){
+  bodyRotate = 10;
+  bodyTranslate = -0.2; 
+  backTailRotate = 0;
+  tailJointRotate = 0;
+  flameJointRotate = 0;
+  jointTranslate = 0;
+  leftWingTranslate= 0;
+  rightWingTranslate = 0;
+  leftLegRotate = 0;
+  rightLegRotate = 0;
+  leftArmRotate = 0;
+  rightArmRotate = 0;
+  neckRotate = 0;
+  tailSlider1.value = 0;
+  tailSlider2.value = 0;
+  tailSlider3.value = 0;
+}
+
+function resetCamera(){
+  g_globalTransformMatrix = new Matrix4(); 
+  g_globalAngleX = 0; 
+  g_globalAngleY = 0; 
+  camAngleX.value = g_globalAngleX; 
+  camAngleY.value = g_globalAngleY; 
+  g_trackballRotationMatrix = new Matrix4(); 
+  renderAllShapes();
+}
+
+function main() {
+  
+  //set up canvas and gl variabls
+  setupWegbGL();
+  initTextures();
+
+  //set up actions for the HTML UI elements
+  connectVariablesToGLSL();
+
+  //set up actions for the HTML UI elements
+  addActionsForHTML();
+
+  resetSliders();
+  resetCamera();
+
+  let cube = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
+  g_shapesList.push(cube);
+  
+  // Specify the color for clearing <canvas>
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
