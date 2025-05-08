@@ -5,8 +5,10 @@ var VSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_GlobalTransformMatrix;
+  uniform mat4 u_ViewMatrix;
+  uniform mat4 u_ProjectionMatrix;
   void main() {
-    gl_Position = u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
+    gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
     v_UV = a_UV;
   }`
 
@@ -34,8 +36,12 @@ let u_Color;
 let u_texColorWeight;
 let a_UV;
 let u_Sampler0;
+let u_ViewMatrix;
+let u_ProjectionMatrix;
 let u_ModelMatrix;
 let u_GlobalTransformMatrix;
+
+let camera = new Camera();
 
 function setupWegbGL(){
   // Retrieve <canvas> element
@@ -50,6 +56,10 @@ function setupWegbGL(){
   // gl.enable(gl.BLEND);
   // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.DEPTH_TEST);
+
+  gl.enable(gl.CULL_FACE);
+  gl.frontFace(gl.CCW); // default is CCW (counter-clockwise)
+  gl.cullFace(gl.BACK);
 }
 
 function connectVariablesToGLSL(){
@@ -104,6 +114,18 @@ function connectVariablesToGLSL(){
     console.log('Failed to get the storeage location of u_Sampler0');
     return false;
   }
+
+  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+  if (!u_ViewMatrix) {
+    console.log('Failed to get the storeage location of u_ViewMatrix');
+    return false;
+  };
+
+  u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
+  if (!u_ProjectionMatrix) {
+    console.log('Failed to get the storeage location of u_ProjectionMatrix');
+    return false;
+  };
 }
 
 function initTextures(){
@@ -136,9 +158,9 @@ function sendTextureToGLSL(image){
 }
 
 //Constants
-let isDragging = false;
+let focused = false;
 
-
+const keysPressed = {};
 //set up actions for the HTML UI elements
 function addActionsForHTML(){
   var camAngleX = document.getElementById('camAngleX');
@@ -154,61 +176,64 @@ function addActionsForHTML(){
 
   document.getElementById('camReset').onclick = function(){resetCamera();};
 
-  canvas.addEventListener('wheel', function(e) {
-    e.preventDefault();
-    let scaleFactor = 1;
-    if (e.deltaY > 0) {
-      scaleFactor = 0.95;
-    } else {
-      scaleFactor = 1.05;
-    }
-    g_globalTransformMatrix.scale(scaleFactor, scaleFactor, scaleFactor);
+  canvas.addEventListener('click', () => {
+    canvas.requestPointerLock();
   })
 
-  canvas.addEventListener('mousedown', function(e) {
-    isDragging = true;
-    startX = (e.clientX / canvas.width) * 2 - 1;
-    startY = (1 - e.clientY / canvas.height) * 2 - 1; 
-    startVec = projectToSphere(startX, startY);
-  });
-  
-  canvas.addEventListener('mousemove', function(e) {
-    if (!isDragging) return;
-  
-    let currX = (e.clientX / canvas.width) * 2 - 1;
-    let currY = (1 - e.clientY / canvas.height) * 2 - 1;
-    let currVec = projectToSphere(currX, currY);
-  
-    let axis = [
-        startVec[1] * currVec[2] - startVec[2] * currVec[1],
-        startVec[2] * currVec[0] - startVec[0] * currVec[2],
-        startVec[0] * currVec[1] - startVec[1] * currVec[0],
-    ];
+  function onMouseMove(e) {
+    if (document.pointerLockElement !== canvas) return;
 
-    axis = [-axis[0], -axis[1], -axis[2]];
+    const sensitivity = 0.2;
   
-    let dot = startVec[0]*currVec[0] + startVec[1]*currVec[1] + startVec[2]*currVec[2];
-    let angle = Math.acos(Math.min(1, Math.max(-1, dot)));
+    const yaw = e.movementX * sensitivity;
+    const pitch = -e.movementY * sensitivity
+  
+    camera.panYawDegrees(yaw);
+    camera.panPitchDegrees(pitch);
+  }
 
-    var sensitivity = 2;
-  
-    rotateModel(angle * sensitivity, axis);
-  
-    startVec = currVec;
+  function keyPressDown(e) {
+    keysPressed[e.code] = true;
+  }
+  function keyPressUp(e) {
+    keysPressed[e.code] = false;
+  }
+
+  document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === canvas) {
+      document.addEventListener('mousemove', onMouseMove);
+
+      document.addEventListener('keydown', keyPressDown);
+      
+      document.addEventListener('keyup', keyPressUp);
+
+    } else {
+      document.removeEventListener('mousemove', onMouseMove);
+
+      document.removeEventListener('keydown', keyPressDown);
+      
+      document.removeEventListener('keyup', keyPressUp);
+    }
   });
-  
-  canvas.addEventListener('mouseup', function(e) {
-    isDragging = false;
-  });
+
 }
 
 var g_shapesList = [];
+
+var g_eye = new Vector3([3, 3, -3]);
+var g_at= new Vector3([0,0, 0]);
+var g_up = new Vector3([0, 1, 0]);
 
 //Draw every shape that is supposed to be in the canvas
 function renderAllShapes(){
 
     //check the time at the start of this function
     var startTime = performance.now();
+
+    gl.uniformMatrix4fv(u_ProjectionMatrix, false, camera.projMatrix.elements);
+
+    gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
+
     var globalTransformMat;
     globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
     gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
@@ -251,12 +276,39 @@ function rotateModel(angle, axis) {
   g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix); 
 }
 
-var g_startTime = performance.now()/1000.0;
-var g_seconds = performance.now()/1000.0-g_startTime;
+let lastFrame = performance.now()/ 1000.0;
+let now;
+let deltaTime;
 
 function tick(){
-  g_seconds = performance.now()/1000.0-g_startTime;
+  now = performance.now()/1000.0;
+  deltaTime = now - lastFrame;
+  lastFrame = now;
   // console.log(g_seconds);
+  if (keysPressed['KeyW']) {
+    camera.moveForward(deltaTime);
+  }
+  if (keysPressed['KeyS']) {
+    camera.moveBackwards(deltaTime);
+  }
+  if (keysPressed['KeyA']) {
+    camera.moveLeft(deltaTime);
+  }
+  if (keysPressed['KeyD']) {
+    camera.moveRight(deltaTime);
+  }
+  if (keysPressed['KeyQ']) {
+    camera.panLeft(deltaTime);
+  }
+  if (keysPressed['KeyE']) {
+    camera.panRight(deltaTime);
+  }
+  if (keysPressed['KeyR']){
+    camera.panUp(deltaTime);
+  }
+  if (keysPressed['KeyT']){
+    camera.panDown(deltaTime);
+  }
   renderAllShapes();
   requestAnimationFrame(tick);
 }
@@ -286,14 +338,13 @@ function main() {
   resetCamera();
 
   let cube1 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-  cube1.matrix.translate(-0.5, 0, 0);
-  cube1.matrix.scale(0.2, 0.2, 0.2)
   g_shapesList.push(cube1);
 
-  let cube2 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-  cube2.matrix.translate(0.5, 0, 0);
-  cube2.matrix.scale(0.2, 0.2, 0.2)
-  g_shapesList.push(cube2);
+  // let cube2 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
+  // cube2.matrix.translate(0.5, 0, 0);
+  // cube2.matrix.scale(0.2, 0.2, 0.2)
+  // g_shapesList.push(cube2);
+
   tick();
   
   // Specify the color for clearing <canvas>
