@@ -58,7 +58,7 @@ function setupWegbGL(){
   gl.enable(gl.DEPTH_TEST);
 
   gl.enable(gl.CULL_FACE);
-  gl.frontFace(gl.CCW); // default is CCW (counter-clockwise)
+  gl.frontFace(gl.CCW); 
   gl.cullFace(gl.BACK);
 }
 
@@ -163,18 +163,7 @@ let focused = false;
 const keysPressed = {};
 //set up actions for the HTML UI elements
 function addActionsForHTML(){
-  var camAngleX = document.getElementById('camAngleX');
-
-  camAngleX.addEventListener('input', function() {g_globalAngleX = camAngleX.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
-
-  var camAngleY = document.getElementById('camAngleY');
-
-  camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
-  
   canvas = document.getElementById('webgl');
-
-
-  document.getElementById('camReset').onclick = function(){resetCamera();};
 
   canvas.addEventListener('click', () => {
     canvas.requestPointerLock();
@@ -183,7 +172,7 @@ function addActionsForHTML(){
   function onMouseMove(e) {
     if (document.pointerLockElement !== canvas) return;
 
-    const sensitivity = 0.2;
+    const sensitivity = 0.1;
   
     const yaw = e.movementX * sensitivity;
     const pitch = -e.movementY * sensitivity
@@ -220,10 +209,6 @@ function addActionsForHTML(){
 
 var g_shapesList = [];
 
-var g_eye = new Vector3([3, 3, -3]);
-var g_at= new Vector3([0,0, 0]);
-var g_up = new Vector3([0, 1, 0]);
-
 //Draw every shape that is supposed to be in the canvas
 function renderAllShapes(){
 
@@ -256,24 +241,6 @@ function sendTextToHTML(text, htmlID){
     console.log('Failed to get ' + htmlID + " from HTML");
   }
   htmlElm.innerHTML = text;
-}
-
-function projectToSphere(x, y, radius = 1.0) {
-  let d = Math.sqrt(x * x + y * y);
-  let z;
-  if (d < radius * Math.sqrt(0.5)) {
-      z = Math.sqrt(radius * radius - d * d);
-  } else {
-      let t = radius / Math.sqrt(2.0);
-      z = t * t / d;
-  }
-  return [x, y, z];
-}
-
-function rotateModel(angle, axis) {
-  let rotationMatrix = new Matrix4();
-  rotationMatrix.setRotate(angle * 180 / Math.PI, axis[0], axis[1], axis[2]); 
-  g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix); 
 }
 
 let lastFrame = performance.now()/ 1000.0;
@@ -313,16 +280,6 @@ function tick(){
   requestAnimationFrame(tick);
 }
 
-function resetCamera(){
-  g_globalTransformMatrix = new Matrix4(); 
-  g_globalAngleX = 0; 
-  g_globalAngleY = 0; 
-  camAngleX.value = g_globalAngleX; 
-  camAngleY.value = g_globalAngleY; 
-  g_trackballRotationMatrix = new Matrix4(); 
-  renderAllShapes();
-}
-
 function main() {
   
   //set up canvas and gl variabls
@@ -335,10 +292,23 @@ function main() {
   //set up actions for the HTML UI elements
   addActionsForHTML();
 
-  resetCamera();
+  //Proof of concept
 
-  let cube1 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-  g_shapesList.push(cube1);
+  let map = [[1, 1, 1, 0, 0, 1, 1, 1], 
+             [1, 0, 1, 0, 0, 1, 0, 1],
+             [1, 1, 1, 0, 0, 1, 1, 1]]
+  for (let i = 0; i < map.length; i++){
+    let row = map[i];
+    for (let j=0; j < row.length; j++){
+      if (row[j] > 0){
+        let cube = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
+        cube.matrix.scale(0.2, 0.2, 0.2);
+        cube.matrix.translate(j, -i, 0);
+        g_shapesList.push(cube);
+      }
+    }
+  }
+
 
   // let cube2 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
   // cube2.matrix.translate(0.5, 0, 0);
