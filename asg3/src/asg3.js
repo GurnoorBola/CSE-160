@@ -2,14 +2,18 @@
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
   attribute vec2 a_UV;
+  attribute vec4 a_Color;
+  attribute float a_texColorWeight;
   varying vec2 v_UV;
-  uniform mat4 u_ModelMatrix;
-  uniform mat4 u_GlobalTransformMatrix;
+  varying vec4 v_Color;
+  varying float v_texColorWeight;
   uniform mat4 u_ViewMatrix;
   uniform mat4 u_ProjectionMatrix;
   void main() {
-    gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
+    gl_Position = u_ProjectionMatrix * u_ViewMatrix * a_Position;
     v_UV = a_UV;
+    v_Color = a_Color;
+    v_texColorWeight = a_texColorWeight;
   }`
 
 // Fragment shader program
@@ -17,11 +21,11 @@ var FSHADER_SOURCE = `
   uniform sampler2D u_Sampler0;
   precision mediump float;
   varying vec2 v_UV;
-  uniform vec4 u_Color;
-  uniform float u_texColorWeight;
+  varying vec4 v_Color;
+  varying float v_texColorWeight;
   void main() {
-    float t = u_texColorWeight;
-    gl_FragColor = (1.0-t) * u_Color + t * texture2D(u_Sampler0, v_UV);
+    float t = v_texColorWeight;
+    gl_FragColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
   }`
 
 // Global Variables
@@ -32,14 +36,13 @@ let g_globalAngleY = 0;
 let g_globalTransformMatrix = new Matrix4();
 let g_trackballRotationMatrix = new Matrix4();
 let a_Position;
-let u_Color;
-let u_texColorWeight;
+let a_Color;
+let a_texColorWeight;
 let a_UV;
 let u_Sampler0;
 let u_ViewMatrix;
 let u_ProjectionMatrix;
 let u_ModelMatrix;
-let u_GlobalTransformMatrix;
 
 let camera = new Camera();
 
@@ -76,30 +79,16 @@ function connectVariablesToGLSL(){
     return;
   }
 
-  // Get the storage location of u_Color
-  u_Color = gl.getUniformLocation(gl.program, 'u_Color');
-  if (!u_Color) {
-    console.log('Failed to get the storage location of u_Color');
+  // Get the storage location of a_Color
+  a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+  if (!a_Color) {
+    console.log('Failed to get the storage location of a_Color');
     return;
   }
 
-  //Get the storage location of u_ModelMatrix
-  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  if (!u_ModelMatrix) {
-    console.log('Failed to get the storage location of u_ModelMatrix');
-    return;
-  }
-
-  //Get the storage location of u_GlobalRotateMatrix
-  u_GlobalTransformMatrix = gl.getUniformLocation(gl.program, 'u_GlobalTransformMatrix');
-  if (!u_GlobalTransformMatrix) {
-    console.log('Failed to get the storage location of u_GlobalTransformMatrix');
-    return;
-  }
-
-  u_texColorWeight = gl.getUniformLocation(gl.program, 'u_texColorWeight');
-  if (!u_texColorWeight){
-    console.log('Failed to get locaiton of u_texColorWeight');
+  a_texColorWeight = gl.getAttribLocation(gl.program, 'a_texColorWeight');
+  if (!a_texColorWeight){
+    console.log('Failed to get locaiton of a_texColorWeight');
     return;
   }
 
@@ -135,7 +124,7 @@ function initTextures(){
     return false;
   }
 
-  image.onload = function() { sendTextureToGLSL(image); renderAllShapes();}
+  image.onload = function() { sendTextureToGLSL(image); renderAllChunks();}
   image.src = 'luckyblock.png';
 
   return true;
@@ -207,10 +196,10 @@ function addActionsForHTML(){
 
 }
 
-var g_shapesList = [];
+var g_chunksList = [];
 
-//Draw every shape that is supposed to be in the canvas
-function renderAllShapes(){
+//Draw every chunk that is in the world
+function renderAllChunks(){
 
     //check the time at the start of this function
     var startTime = performance.now();
@@ -219,16 +208,13 @@ function renderAllShapes(){
 
     gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
 
-    var globalTransformMat;
-    globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
-    gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
     // Clear <canvas>
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // var len = g_points.length;
-    var len = g_shapesList.length;
+    var len = g_chunksList.length;
     for(var i = 0; i < len; i++) {
-      g_shapesList[i].render();
+      g_chunksList[i].render();
     }
 
     var duration = performance.now() - startTime;
@@ -276,7 +262,7 @@ function tick(){
   if (keysPressed['KeyT']){
     camera.panDown(deltaTime);
   }
-  renderAllShapes();
+  renderAllChunks();
   requestAnimationFrame(tick);
 }
 
@@ -294,29 +280,21 @@ function main() {
 
   //Proof of concept
 
-  let map = [[1, 1, 1, 0, 0, 1, 1, 1], 
-             [1, 0, 1, 0, 0, 1, 0, 1],
-             [1, 1, 1, 0, 0, 1, 1, 1]]
-  for (let i = 0; i < map.length; i++){
-    let row = map[i];
-    for (let j=0; j < row.length; j++){
-      if (row[j] > 0){
-        let cube = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-        cube.matrix.scale(0.2, 0.2, 0.2);
-        cube.matrix.translate(j, -i, 0);
-        g_shapesList.push(cube);
+  let chunk = new Chunk([0, 0, 0]);
+  for (let x = 0; x < chunkSize; x++) {
+    for (let y = 0; y < chunkSize; y++) {
+      for (let z = 0; z < chunkSize; z++) {
+        addBlock(chunk, BLOCK_TYPES.LUCKY, x, y, z);
       }
     }
   }
+  console.log(chunk.blocks);
+  chunk.build();
+  g_chunksList.push(chunk);
 
-
-  // let cube2 = new Cube(Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]));
-  // cube2.matrix.translate(0.5, 0, 0);
-  // cube2.matrix.scale(0.2, 0.2, 0.2)
-  // g_shapesList.push(cube2);
 
   tick();
-  
+
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
