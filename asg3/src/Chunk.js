@@ -1,19 +1,34 @@
 const BLOCK_TYPES = {
     AIR: 0,
-    LUCKY: 1
+    LUCKY: 1,
+    GRASS: 2,
+    DIRT: 3,
 }
+
+const sheetSize = 2048;
 
 const BLOCK_DATA = {
     [BLOCK_TYPES.LUCKY] : {
         name: 'lucky',
         color: [1, 0, 0, 1],
-        uv: Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]),
+        uv: Array(6).fill().map(() => [0.312744140625, 0.562744140625, 0.437255859375, 0.562744140625, 0.437255859375, 0.687255859375, 0.312744140625, 0.687255859375]),
         texWeight: 1.0
-    }
+    },
+    [BLOCK_TYPES.GRASS] : {
+        name: 'grass',
+        color: [0, 1, 0, 1],
+        uv: [[0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625, 0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375], [0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625, 0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375], [0.750244140625, 0.750244140625, 0.999755859375, 0.750244140625, 0.999755859375, 0.999755859375, 0.750244140625, 0.999755859375], [0.250244140625, 0.750244140625, 0.499755859375, 0.750244140625, 0.499755859375, 0.999755859375, 0.250244140625, 0.999755859375], [0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625, 0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375], [0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625, 0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375]],
+        texWeight: 1.0
+    },
+    [BLOCK_TYPES.DIRT] : {
+        name: 'dirt',
+        color: [1, 0, 0, 1],
+        uv: Array(6).fill().map(() => [0.250244140625, 0.750244140625, 0.499755859375, 0.750244140625, 0.499755859375, 0.999755859375, 0.250244140625, 0.999755859375]),
+        texWeight: 1.0
+    },
 }
-
-const worldSize = 32;
 const chunkSize = 16
+const worldSize = chunkSize*20;
 const cubeSize = 0.5
 
 function getIndex(x, y, z) {
@@ -60,7 +75,34 @@ function addWorldBlock(type, x, y, z){
             chunk.blocks[index] = type;
             // console.log(`Adding block at (${x}, ${y}, ${z})`);
             // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
-            return chunk;
+            return;
+        }
+    }
+    console.log('invalid coordinates');
+    return false;
+}
+
+function placeWorldBlock(type, x, y, z){
+    for (let i = 0; i < g_chunksList.length; i++) {
+        let chunk = g_chunksList[i];
+        if (x >= chunk.x && x < (chunk.x + chunkSize) && 
+            y >= chunk.y && y < (chunk.y + chunkSize) && 
+            z >= chunk.z && z < (chunk.z + chunkSize)
+        ){
+            //convert world coords to chunk coords
+            let chunkX = x%chunkSize;
+            let chunkY = y%chunkSize;
+            let chunkZ = z%chunkSize;
+            if (chunkX < 0) chunkX += chunkSize;
+            if (chunkY < 0) chunkY += chunkSize;
+            if (chunkZ < 0) chunkZ += chunkSize;
+
+            let index = getIndex(chunkX, chunkY, chunkZ);
+            chunk.blocks[index] = type;
+            // console.log(`Adding block at (${x}, ${y}, ${z})`);
+            // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
+            chunk.build();
+            return;
         }
     }
     console.log('invalid coordinates');
@@ -86,7 +128,35 @@ function delWorldBlock(x, y, z) {
             chunk.blocks[index] = BLOCK_TYPES.AIR;
             // console.log(`Deleting block at (${x}, ${y}, ${z})`);
             // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
-            return chunk;
+            chunk.build();
+            return;
+        }
+    }
+    console.log('invalid coordinates');
+    return false;
+}
+
+function removeWorldBlock(x, y, z) {
+    for (let i = 0; i < g_chunksList.length; i++) {
+        let chunk = g_chunksList[i];
+        if (x >= chunk.x && x < (chunk.x + chunkSize) && 
+            y >= chunk.y && y < (chunk.y + chunkSize) && 
+            z >= chunk.z && z < (chunk.z + chunkSize)
+        ){
+            //convert world coords to chunk coords
+            let chunkX = x%chunkSize;
+            let chunkY = y%chunkSize;
+            let chunkZ = z%chunkSize;
+            if (chunkX < 0) chunkX += chunkSize;
+            if (chunkY < 0) chunkY += chunkSize;
+            if (chunkZ < 0) chunkZ += chunkSize;
+
+            let index = getIndex(chunkX, chunkY, chunkZ);
+            chunk.blocks[index] = BLOCK_TYPES.AIR;
+            // console.log(`Deleting block at (${x}, ${y}, ${z})`);
+            // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
+            chunk.build();
+            return true;
         }
     }
     console.log('invalid coordinates');
@@ -100,9 +170,37 @@ function checkLookBlock(camera) {
     forward.normalize();
 }
 
+function chunkify(){
+  const half = worldSize / 2;
+
+  for (let x = -half; x < half; x += chunkSize) {
+    for (let y = 0; y < worldSize; y += chunkSize) {
+      for (let z = -half; z < half; z += chunkSize) {
+        let chunk = new Chunk([x, y, z]);
+        chunk.build();
+        g_chunksList.push(chunk);
+        console.log(`Created chunk at ${x}, ${y} ${z}`);
+      }
+    }
+  }
+}
+
+function buildGround() {
+  const half = worldSize / 2;
+  for (let x = -half; x < half; x++) {
+    for (let z = -half; z < half; z++) {
+      addWorldBlock(BLOCK_TYPES.GRASS, x, 0, z);
+    }
+  }
+  for (let i = 0; i < g_chunksList.length; i++){
+    g_chunksList[i].build();
+  }
+}
 
 class Chunk {
     constructor(origin) {
+        this.type = 'chunk';
+
         this.x = origin[0];
         this.y = origin[1];
         this.z = origin[2];

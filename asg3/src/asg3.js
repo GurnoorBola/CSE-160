@@ -125,7 +125,7 @@ function initTextures(){
   }
 
   image.onload = function() { sendTextureToGLSL(image); renderAllChunks();}
-  image.src = 'luckyblock.png';
+  image.src = 'textureAtlas.png';
 
   return true;
 }
@@ -177,16 +177,16 @@ function addActionsForHTML(){
     keysPressed[e.code] = false;
   }
 
-  function getBlockInFront(camera, cubeSize, distance = 2) {
+  function getBlockInFront(camera, cubeSize, distance = 2.0) {
     let forward = new Vector3();
     forward.set(camera.at).sub(camera.eye).normalize();
 
     let worldPos = new Vector3();
     worldPos.set(camera.eye).add(new Vector3().set(forward).mul(cubeSize * distance));
 
-    let x = Math.floor(worldPos.elements[0] / cubeSize);
-    let y = Math.floor(worldPos.elements[1] / cubeSize);
-    let z = Math.floor(worldPos.elements[2] / cubeSize);
+    let x = Math.round(worldPos.elements[0] / cubeSize);
+    let y = Math.round(worldPos.elements[1] / cubeSize);
+    let z = Math.round(worldPos.elements[2] / cubeSize);
 
     return { x, y, z };
   }
@@ -197,14 +197,12 @@ function mouseClick(e) {
 
   if (e.button === 0) {
     // console.log("Place at", x, y, z);
-    let chunk = addWorldBlock(BLOCK_TYPES.LUCKY, x, y, z);
-    if (chunk) chunk.build();
+    placeWorldBlock(BLOCK_TYPES.LUCKY, x, y, z);
   }
 
   if (e.button === 2) {
     // console.log("Delete at", x, y, z);
-    let chunk = delWorldBlock(x, y, z);
-    if (chunk) chunk.build();
+    removeWorldBlock(x, y, z)
   }
 }
 
@@ -316,39 +314,14 @@ function main() {
   addActionsForHTML();
 
   //Proof of concept
+  chunkify();
 
-  let chunk1 = new Chunk([0, 0, 0]);
-  // for (let x = 0; x < chunkSize; x++) {
-  //   for (let y = 0; y < chunkSize; y++) {
-  //     for (let z = 0; z < chunkSize; z++) {
-  //       addChunkBlock(chunk1, BLOCK_TYPES.LUCKY, x, y, z);
-  //     }
-  //   }
-  // }
-  console.log(chunk1.blocks);
+  buildGround();
 
-  let chunk2 = new Chunk([-16, 0, 0]);
-  console.log(chunk2.blocks);
-
-  let chunk3 = new Chunk([0, 0, -16]);
-  console.log(chunk3.blocks);
-
-  let chunk4 = new Chunk([-16, 0, -16]);
-  console.log(chunk4.blocks);
-
-  g_chunksList.push(chunk1);
-  g_chunksList.push(chunk2);
-  g_chunksList.push(chunk3);
-  g_chunksList.push(chunk4);
-
-  addWorldBlock(BLOCK_TYPES.LUCKY, -1, 1, -1)
-  addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -1)
+  addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
+  addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
+  addWorldBlock(BLOCK_TYPES.DIRT, -1, 1, -1)
   addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -16)
-
-  chunk1.build();
-  chunk2.build();
-  chunk3.build();
-  chunk4.build();
 
   tick();
 
