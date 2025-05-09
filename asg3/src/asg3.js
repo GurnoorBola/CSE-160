@@ -318,10 +318,10 @@ function main() {
 
   buildGround();
 
-  addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
-  addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
-  addWorldBlock(BLOCK_TYPES.DIRT, -1, 1, -1)
-  addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -16)
+  // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
+  // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
+  // addWorldBlock(BLOCK_TYPES.DIRT, -1, 1, -1)
+  // addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -16)
 
   tick();
 
