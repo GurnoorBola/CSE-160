@@ -4,12 +4,12 @@
  * @param gl GL context
  * @param vshader a vertex shader program (string)
  * @param fshader a fragment shader program (string)
- * @return true, if the program object was created and successfully made current 
+ * @return true, if the program object was created and successfully made current
  */
 function initShaders(gl, vshader, fshader) {
   var program = createProgram(gl, vshader, fshader);
   if (!program) {
-    console.log('Failed to create program');
+    console.log("Failed to create program");
     return false;
   }
 
@@ -51,7 +51,7 @@ function createProgram(gl, vshader, fshader) {
   var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
   if (!linked) {
     var error = gl.getProgramInfoLog(program);
-    console.log('Failed to link program: ' + error);
+    console.log("Failed to link program: " + error);
     gl.deleteProgram(program);
     gl.deleteShader(fragmentShader);
     gl.deleteShader(vertexShader);
@@ -71,7 +71,7 @@ function loadShader(gl, type, source) {
   // Create shader object
   var shader = gl.createShader(type);
   if (shader == null) {
-    console.log('unable to create shader');
+    console.log("unable to create shader");
     return null;
   }
 
@@ -85,7 +85,7 @@ function loadShader(gl, type, source) {
   var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
   if (!compiled) {
     var error = gl.getShaderInfoLog(shader);
-    console.log('Failed to compile shader: ' + error);
+    console.log("Failed to compile shader: " + error);
     gl.deleteShader(shader);
     return null;
   }
@@ -93,7 +93,7 @@ function loadShader(gl, type, source) {
   return shader;
 }
 
-/** 
+/**
  * Initialize and get the rendering for WebGL
  * @param canvas <cavnas> element
  * @param opt_debug flag to initialize the context for debugging

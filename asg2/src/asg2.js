@@ -8,7 +8,7 @@ var VSHADER_SOURCE = `
   void main() {
     gl_Position = u_GlobalTransformMatrix * u_ModelMatrix * a_Position;
     v_Color = a_Color;
-  }`
+  }`;
 
 // Fragment shader program
 var FSHADER_SOURCE = `
@@ -16,7 +16,7 @@ var FSHADER_SOURCE = `
   varying vec4 v_Color;
   void main() {
     gl_FragColor = v_Color;
-  }`
+  }`;
 
 // Global Variables
 let canvas;
@@ -32,14 +32,14 @@ let u_GlobalTransformMatrix;
 
 let isDrawing = true;
 
-function setupWegbGL(){
+function setupWegbGL() {
   // Retrieve <canvas> element
-  canvas = document.getElementById('webgl');
+  canvas = document.getElementById("webgl");
 
   // Get the rendering context for WebGL
-  gl = canvas.getContext('webgl', { preserveDrawingBuffer: true});
+  gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
   if (!gl) {
-    console.log('Failed to get the rendering context for WebGL');
+    console.log("Failed to get the rendering context for WebGL");
     return;
   }
   // gl.enable(gl.BLEND);
@@ -47,38 +47,43 @@ function setupWegbGL(){
   gl.enable(gl.DEPTH_TEST);
 }
 
-function connectVariablesToGLSL(){
+function connectVariablesToGLSL() {
   // Initialize shaders
   if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to intialize shaders.');
+    console.log("Failed to intialize shaders.");
     return;
   }
 
   // // Get the storage location of a_Position
-  a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  a_Position = gl.getAttribLocation(gl.program, "a_Position");
   if (a_Position < 0) {
-    console.log('Failed to get the storage location of a_Position');
+    console.log("Failed to get the storage location of a_Position");
     return;
   }
 
   // Get the storage location of u_FragColor
-  a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+  a_Color = gl.getAttribLocation(gl.program, "a_Color");
   if (!a_Color) {
-    console.log('Failed to get the storage location of u_FragColor');
+    console.log("Failed to get the storage location of u_FragColor");
     return;
   }
 
   //Get the storage location of u_ModelMatrix
-  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
   if (!u_ModelMatrix) {
-    console.log('Failed to get the storage location of u_ModelMatrix');
+    console.log("Failed to get the storage location of u_ModelMatrix");
     return;
   }
 
   //Get the storage location of u_GlobalRotateMatrix
-  u_GlobalTransformMatrix = gl.getUniformLocation(gl.program, 'u_GlobalTransformMatrix');
+  u_GlobalTransformMatrix = gl.getUniformLocation(
+    gl.program,
+    "u_GlobalTransformMatrix",
+  );
   if (!u_GlobalTransformMatrix) {
-    console.log('Failed to get the storage location of u_GlobalTransformMatrix');
+    console.log(
+      "Failed to get the storage location of u_GlobalTransformMatrix",
+    );
     return;
   }
 }
@@ -90,30 +95,46 @@ const CIRCLE = 2;
 
 let isDragging = false;
 
-
 let tailSlider1, tailSlider2, tailSlider3;
 //set up actions for the HTML UI elements
-function addActionsForHTML(){
-  var camAngleX = document.getElementById('camAngleX');
+function addActionsForHTML() {
+  var camAngleX = document.getElementById("camAngleX");
 
-  camAngleX.addEventListener('input', function() {g_globalAngleX = camAngleX.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
+  camAngleX.addEventListener("input", function () {
+    g_globalAngleX = camAngleX.value;
+    g_trackballRotationMatrix = new Matrix4();
+    renderAllShapes();
+  });
 
-  var camAngleY = document.getElementById('camAngleY');
+  var camAngleY = document.getElementById("camAngleY");
 
-  camAngleY.addEventListener('input', function() {g_globalAngleY = camAngleY.value; g_trackballRotationMatrix = new Matrix4(); renderAllShapes()});
+  camAngleY.addEventListener("input", function () {
+    g_globalAngleY = camAngleY.value;
+    g_trackballRotationMatrix = new Matrix4();
+    renderAllShapes();
+  });
 
-  tailSlider1 = document.getElementById('tailJoint1');
-  tailSlider1.addEventListener('input', function(){backTailRotate = tailSlider1.value; calculateDragon();});
+  tailSlider1 = document.getElementById("tailJoint1");
+  tailSlider1.addEventListener("input", function () {
+    backTailRotate = tailSlider1.value;
+    calculateDragon();
+  });
 
-  tailSlider2 = document.getElementById('tailJoint2');
-  tailSlider2.addEventListener('input', function(){tailJointRotate = tailSlider2.value; calculateDragon();});
+  tailSlider2 = document.getElementById("tailJoint2");
+  tailSlider2.addEventListener("input", function () {
+    tailJointRotate = tailSlider2.value;
+    calculateDragon();
+  });
 
-  tailSlider3 = document.getElementById('tailJoint3');
-  tailSlider3.addEventListener('input', function(){flameJointRotate = tailSlider3.value; calculateDragon();});
-  
-  canvas = document.getElementById('webgl');
+  tailSlider3 = document.getElementById("tailJoint3");
+  tailSlider3.addEventListener("input", function () {
+    flameJointRotate = tailSlider3.value;
+    calculateDragon();
+  });
 
-  document.getElementById('Color1').onclick = function(){
+  canvas = document.getElementById("webgl");
+
+  document.getElementById("Color1").onclick = function () {
     bodyColor = [249, 177, 101];
     caColor = [213, 221, 221];
     wingColor = [54, 147, 162];
@@ -129,13 +150,13 @@ function addActionsForHTML(){
     renderAllShapes();
   };
 
-  document.getElementById('Color2').onclick = function(){
-    bodyColor = [135,125,151];
+  document.getElementById("Color2").onclick = function () {
+    bodyColor = [135, 125, 151];
     caColor = [213, 221, 221];
-    wingColor = [165,52,91];
-    tongueColor = [159,73,88];
+    wingColor = [165, 52, 91];
+    tongueColor = [159, 73, 88];
     counterColor = [250, 238, 178];
-    pupilColor = [165,52,91];
+    pupilColor = [165, 52, 91];
     nostrilColor = [49, 44, 32];
     eyeWhiteColor = [248, 245, 250];
     flameColor = [238, 86, 51];
@@ -145,13 +166,24 @@ function addActionsForHTML(){
     renderAllShapes();
   };
 
+  document.getElementById("camReset").onclick = function () {
+    resetCamera();
+  };
+  document.getElementById("jointReset").onclick = function () {
+    resetSliders();
+    calculateDragon();
+  };
+  document.getElementById("startAnimate").onclick = function () {
+    happy = false;
+    bodyRotate = 10;
+    bodyTranslate = -0.2;
+    walking = true;
+  };
+  document.getElementById("stopAnimate").onclick = function () {
+    stopWalk();
+  };
 
-  document.getElementById('camReset').onclick = function(){resetCamera();};
-  document.getElementById('jointReset').onclick = function(){resetSliders(); calculateDragon();}
-  document.getElementById('startAnimate').onclick = function(){happy = false; bodyRotate = 10; bodyTranslate = -0.2; walking = true;};
-  document.getElementById('stopAnimate').onclick = function(){stopWalk()};
-
-  canvas.addEventListener('wheel', function(e) {
+  canvas.addEventListener("wheel", function (e) {
     e.preventDefault();
     let scaleFactor = 1;
     if (e.deltaY > 0) {
@@ -160,47 +192,52 @@ function addActionsForHTML(){
       scaleFactor = 1.05;
     }
     g_globalTransformMatrix.scale(scaleFactor, scaleFactor, scaleFactor);
-  })
+  });
 
-  canvas.addEventListener('mousedown', function(e) {
+  canvas.addEventListener("mousedown", function (e) {
     if (e.shiftKey) {
-      secretAnimationStart = performance.now()/1000.0; stopWalk(); happy = true;
+      secretAnimationStart = performance.now() / 1000.0;
+      stopWalk();
+      happy = true;
     } else {
       isDragging = true;
       startX = (e.clientX / canvas.width) * 2 - 1;
-      startY = (1 - e.clientY / canvas.height) * 2 - 1; 
+      startY = (1 - e.clientY / canvas.height) * 2 - 1;
       startVec = projectToSphere(startX, startY);
     }
   });
-  
-  canvas.addEventListener('mousemove', function(e) {
+
+  canvas.addEventListener("mousemove", function (e) {
     if (!isDragging) return;
-  
+
     let currX = (e.clientX / canvas.width) * 2 - 1;
     let currY = (1 - e.clientY / canvas.height) * 2 - 1;
     let currVec = projectToSphere(currX, currY);
-  
+
     let axis = [
-        startVec[1] * currVec[2] - startVec[2] * currVec[1],
-        startVec[2] * currVec[0] - startVec[0] * currVec[2],
-        startVec[0] * currVec[1] - startVec[1] * currVec[0],
+      startVec[1] * currVec[2] - startVec[2] * currVec[1],
+      startVec[2] * currVec[0] - startVec[0] * currVec[2],
+      startVec[0] * currVec[1] - startVec[1] * currVec[0],
     ];
 
     axis = [-axis[0], -axis[1], -axis[2]];
-  
-    let dot = startVec[0]*currVec[0] + startVec[1]*currVec[1] + startVec[2]*currVec[2];
+
+    let dot =
+      startVec[0] * currVec[0] +
+      startVec[1] * currVec[1] +
+      startVec[2] * currVec[2];
     let angle = Math.acos(Math.min(1, Math.max(-1, dot)));
 
     var sensitivity = 2;
-  
+
     rotateModel(angle * sensitivity, axis);
 
     renderAllShapes();
-  
+
     startVec = currVec;
   });
-  
-  canvas.addEventListener('mouseup', function(e) {
+
+  canvas.addEventListener("mouseup", function (e) {
     isDragging = false;
   });
 }
@@ -209,49 +246,64 @@ var g_shapesList = [];
 
 let secretAnimationStart;
 //Draw every shape that is supposed to be in the canvas
-function renderAllShapes(){
+function renderAllShapes() {
+  //check the time at the start of this function
+  var startTime = performance.now();
+  var globalTransformMat;
+  globalTransformMat = new Matrix4()
+    .multiply(g_globalTransformMatrix)
+    .rotate(g_globalAngleX, 0, 1, 0)
+    .rotate(g_globalAngleY, 1, 0, 0)
+    .multiply(g_trackballRotationMatrix);
+  gl.uniformMatrix4fv(
+    u_GlobalTransformMatrix,
+    false,
+    globalTransformMat.elements,
+  );
 
-    //check the time at the start of this function
-    var startTime = performance.now();
-    var globalTransformMat;
-    globalTransformMat = new Matrix4().multiply(g_globalTransformMatrix).rotate(g_globalAngleX, 0, 1, 0).rotate(g_globalAngleY, 1, 0, 0).multiply(g_trackballRotationMatrix);
-    gl.uniformMatrix4fv(u_GlobalTransformMatrix, false, globalTransformMat.elements);
+  if (walking && !happy) {
+    g_shapesList = [];
+    animateWalk();
+    calculateDragon();
+  }
 
-    if (walking && !happy){
+  if (happy && !walking) {
+    let seconds = performance.now() / 1000.0 - secretAnimationStart;
+    if (seconds < 2) {
       g_shapesList = [];
-      animateWalk();
-      calculateDragon();  
+      bodyRotate = 10 + 360 * seconds;
+      bodyTranslate = -0.2 + 0.2 * Math.abs(Math.sin(2 * Math.PI * seconds));
+
+      calculateDragon();
+    } else {
+      happy = false;
     }
+  }
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    if (happy && !walking){
-      let seconds = performance.now()/1000.0 - secretAnimationStart; 
-      if (seconds < 2){
-        g_shapesList = [];
-        bodyRotate = 10 + 360*seconds;
-        bodyTranslate = -0.2 + 0.2 * Math.abs(Math.sin(2*Math.PI*seconds));
+  // var len = g_points.length;
+  var len = g_shapesList.length;
+  for (var i = 0; i < len; i++) {
+    g_shapesList[i].render();
+  }
 
-        calculateDragon();
-      } else {
-        happy = false;
-      }
-    }
-    // Clear <canvas>
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    // var len = g_points.length;
-    var len = g_shapesList.length;
-    for(var i = 0; i < len; i++) {
-      g_shapesList[i].render();
-    }
-
-    var duration = performance.now() - startTime;
-    sendTextToHTML('numdot: ' + len + ' ms: ' + Math.floor(duration) + ' fps: ' + Math.floor(10000/duration)/10, 'numdot');
+  var duration = performance.now() - startTime;
+  sendTextToHTML(
+    "numdot: " +
+      len +
+      " ms: " +
+      Math.floor(duration) +
+      " fps: " +
+      Math.floor(10000 / duration) / 10,
+    "numdot",
+  );
 }
 
-function sendTextToHTML(text, htmlID){
+function sendTextToHTML(text, htmlID) {
   var htmlElm = document.getElementById(htmlID);
   if (!htmlElm) {
-    console.log('Failed to get ' + htmlID + " from HTML");
+    console.log("Failed to get " + htmlID + " from HTML");
   }
   htmlElm.innerHTML = text;
 }
@@ -260,25 +312,27 @@ function projectToSphere(x, y, radius = 1.0) {
   let d = Math.sqrt(x * x + y * y);
   let z;
   if (d < radius * Math.sqrt(0.5)) {
-      z = Math.sqrt(radius * radius - d * d);
+    z = Math.sqrt(radius * radius - d * d);
   } else {
-      let t = radius / Math.sqrt(2.0);
-      z = t * t / d;
+    let t = radius / Math.sqrt(2.0);
+    z = (t * t) / d;
   }
   return [x, y, z];
 }
 
 function rotateModel(angle, axis) {
   let rotationMatrix = new Matrix4();
-  rotationMatrix.setRotate(angle * 180 / Math.PI, axis[0], axis[1], axis[2]); 
-  g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix); 
+  rotationMatrix.setRotate((angle * 180) / Math.PI, axis[0], axis[1], axis[2]);
+  g_trackballRotationMatrix = rotationMatrix.multiply(
+    g_trackballRotationMatrix,
+  );
 }
 
-var g_startTime = performance.now()/1000.0;
-var g_seconds = performance.now()/1000.0-g_startTime;
+var g_startTime = performance.now() / 1000.0;
+var g_seconds = performance.now() / 1000.0 - g_startTime;
 
-function tick(){
-  g_seconds = performance.now()/1000.0-g_startTime;
+function tick() {
+  g_seconds = performance.now() / 1000.0 - g_startTime;
   console.log(g_seconds);
   renderAllShapes();
   requestAnimationFrame(tick);
@@ -287,33 +341,33 @@ function tick(){
 let walking = false;
 let happy = false;
 let bodyRotate = 10;
-let bodyTranslate = -0.2; 
+let bodyTranslate = -0.2;
 let backTailRotate = 0;
 let tailJointRotate = 0;
 let flameJointRotate = 0;
 let jointTranslate = 0;
-let leftWingTranslate= 0;
+let leftWingTranslate = 0;
 let rightWingTranslate = 0;
 let leftLegRotate = 0;
 let rightLegRotate = 0;
 let leftArmRotate = 0;
 let rightArmRotate = 0;
 let neckRotate = 0;
-function animateWalk(){
+function animateWalk() {
   walking = true;
   resetSliders();
-  jointTranslate = 0.012*Math.cos(2*g_seconds);
-  leftWingTranslate = 0.03*Math.cos(-3.5*g_seconds);
-  rightWingTranslate= -0.03*Math.cos(3.5*g_seconds);
-  leftLegRotate = 20*Math.sin(4*g_seconds);
-  rightLegRotate= 20*Math.sin(-4*g_seconds);
-  leftArmRotate = -20*Math.cos(3.5*g_seconds);
-  rightArmRotate = 20*Math.cos(3.5*g_seconds)
-  neckRotate = 5*Math.cos(5*g_seconds)
-  flameJointRotate = 360*g_seconds/5;
+  jointTranslate = 0.012 * Math.cos(2 * g_seconds);
+  leftWingTranslate = 0.03 * Math.cos(-3.5 * g_seconds);
+  rightWingTranslate = -0.03 * Math.cos(3.5 * g_seconds);
+  leftLegRotate = 20 * Math.sin(4 * g_seconds);
+  rightLegRotate = 20 * Math.sin(-4 * g_seconds);
+  leftArmRotate = -20 * Math.cos(3.5 * g_seconds);
+  rightArmRotate = 20 * Math.cos(3.5 * g_seconds);
+  neckRotate = 5 * Math.cos(5 * g_seconds);
+  flameJointRotate = (360 * g_seconds) / 5;
 }
 
-function stopWalk(){
+function stopWalk() {
   walking = false;
   resetSliders();
   g_shapesList = [];
@@ -321,14 +375,14 @@ function stopWalk(){
   renderAllShapes();
 }
 
-function resetSliders(){
+function resetSliders() {
   bodyRotate = 10;
-  bodyTranslate = -0.2; 
+  bodyTranslate = -0.2;
   backTailRotate = 0;
   tailJointRotate = 0;
   flameJointRotate = 0;
   jointTranslate = 0;
-  leftWingTranslate= 0;
+  leftWingTranslate = 0;
   rightWingTranslate = 0;
   leftLegRotate = 0;
   rightLegRotate = 0;
@@ -340,17 +394,17 @@ function resetSliders(){
   tailSlider3.value = 0;
 }
 
-function resetCamera(){
-  g_globalTransformMatrix = new Matrix4(); 
-  g_globalAngleX = 0; 
-  g_globalAngleY = 0; 
-  camAngleX.value = g_globalAngleX; 
-  camAngleY.value = g_globalAngleY; 
-  g_trackballRotationMatrix = new Matrix4(); 
+function resetCamera() {
+  g_globalTransformMatrix = new Matrix4();
+  g_globalAngleX = 0;
+  g_globalAngleY = 0;
+  camAngleX.value = g_globalAngleX;
+  camAngleY.value = g_globalAngleY;
+  g_trackballRotationMatrix = new Matrix4();
   renderAllShapes();
 }
 
-function calculateDragon(){
+function calculateDragon() {
   g_shapesList = [];
   //Charizard Body
   body.matrix = new Matrix4();
@@ -367,19 +421,19 @@ function calculateDragon(){
 
   //Charizard Tail
   backTail.matrix = new Matrix4(bodyCoord);
-  backTail.matrix.translate(0, -0.19, 0.4)
+  backTail.matrix.translate(0, -0.19, 0.4);
   backTail.matrix.rotate(backTailRotate, 0, 0, 1);
   let backTailCoord = new Matrix4(backTail.matrix);
-  backTail.matrix.scale(0.2301, 0.2301, 0.6001)
+  backTail.matrix.scale(0.2301, 0.2301, 0.6001);
   g_shapesList.push(backTail);
 
   backTailCounter.matrix = new Matrix4(backTailCoord);
-  backTailCounter.matrix.translate(0, -0.07, 0)
-  backTailCounter.matrix.scale(0.23, 0.23, 0.6)
+  backTailCounter.matrix.translate(0, -0.07, 0);
+  backTailCounter.matrix.scale(0.23, 0.23, 0.6);
   g_shapesList.push(backTailCounter);
 
   tailJoint.matrix = new Matrix4(backTailCoord);
-  tailJoint.matrix.translate(0, 0, 0.24)
+  tailJoint.matrix.translate(0, 0, 0.24);
   //Rotate tail joint
   tailJoint.matrix.rotate(tailJointRotate, 1, 0, 0);
   let tailJointCoord = new Matrix4(tailJoint.matrix);
@@ -387,20 +441,20 @@ function calculateDragon(){
   g_shapesList.push(tailJoint);
 
   upperTail.matrix = new Matrix4(tailJointCoord);
-  upperTail.matrix.translate(0, 0.185, 0)
+  upperTail.matrix.translate(0, 0.185, 0);
   let upperTailCoord = new Matrix4(upperTail.matrix);
-  upperTail.matrix.scale(0.2301, 0.6001, 0.2301)
+  upperTail.matrix.scale(0.2301, 0.6001, 0.2301);
   g_shapesList.push(upperTail);
 
   upperTailCounter.matrix = new Matrix4(upperTailCoord);
-  upperTailCounter.matrix.translate(0, -0.07, 0.07)
-  upperTailCounter.matrix.scale(0.23, 0.6, 0.23)
+  upperTailCounter.matrix.translate(0, -0.07, 0.07);
+  upperTailCounter.matrix.scale(0.23, 0.6, 0.23);
   g_shapesList.push(upperTailCounter);
 
   //charizard flame
   flameJoint.matrix = new Matrix4(upperTailCoord);
   flameJoint.matrix.translate(0, 0.24, 0);
-  flameJoint.matrix.translate(0, jointTranslate, 0)
+  flameJoint.matrix.translate(0, jointTranslate, 0);
   flameJoint.matrix.rotate(flameJointRotate, 0, 1, 0);
   flameJoint.matrix.rotate(0, 1, 0, 0);
   let falmeJointCoord = new Matrix4(flameJoint.matrix);
@@ -413,48 +467,46 @@ function calculateDragon(){
   g_shapesList.push(flameBase);
 
   flameTop1.matrix = new Matrix4(falmeJointCoord);
-  flameTop1.matrix.translate(0, 0.190, 0);
+  flameTop1.matrix.translate(0, 0.19, 0);
   flameTop1.matrix.scale(0.2801, 0.0701, 0.2801);
   g_shapesList.push(flameTop1);
 
   flameTop2.matrix = new Matrix4(falmeJointCoord);
-  flameTop2.matrix.translate(0, 0.250, 0);
+  flameTop2.matrix.translate(0, 0.25, 0);
   flameTop2.matrix.scale(0.2201, 0.0701, 0.2201);
   g_shapesList.push(flameTop2);
 
   flameTop3.matrix = new Matrix4(falmeJointCoord);
-  flameTop3.matrix.translate(0, 0.320, 0);
+  flameTop3.matrix.translate(0, 0.32, 0);
   flameTop3.matrix.scale(0.1501, 0.0701, 0.1501);
   g_shapesList.push(flameTop3);
-
-
 
   //Charizard Wings
   leftinnerWing.matrix = new Matrix4(bodyCoord);
   leftinnerWing.matrix.translate(-0.18, 0.18, 0.26);
-  leftinnerWing.matrix.translate(0, leftWingTranslate, 0)
+  leftinnerWing.matrix.translate(0, leftWingTranslate, 0);
   var leftinnerWingCoord = new Matrix4(leftinnerWing.matrix);
-  leftinnerWing.matrix.scale(0.08, 0.35, 0.08)
+  leftinnerWing.matrix.scale(0.08, 0.35, 0.08);
   g_shapesList.push(leftinnerWing);
 
   lefttopWing1.matrix = new Matrix4(leftinnerWingCoord);
   lefttopWing1.matrix.translate(-0.059, 0.15, 0);
-  lefttopWing1.matrix.scale(0.20, 0.08, 0.08)
+  lefttopWing1.matrix.scale(0.2, 0.08, 0.08);
   g_shapesList.push(lefttopWing1);
 
   lefttopWing2.matrix = new Matrix4(leftinnerWingCoord);
   lefttopWing2.matrix.translate(-0.18, 0.31, 0);
-  lefttopWing2.matrix.scale(0.08, 0.40, 0.08)
+  lefttopWing2.matrix.scale(0.08, 0.4, 0.08);
   g_shapesList.push(lefttopWing2);
 
   leftWingHorn.matrix = new Matrix4(leftinnerWingCoord);
   leftWingHorn.matrix.translate(-0.18, 0.56, 0);
-  leftWingHorn.matrix.scale(0.05, 0.06, 0.05)
+  leftWingHorn.matrix.scale(0.05, 0.06, 0.05);
   g_shapesList.push(leftWingHorn);
 
   lefttopWing3.matrix = new Matrix4(leftinnerWingCoord);
   lefttopWing3.matrix.translate(-0.428, 0.5, 0);
-  lefttopWing3.matrix.scale(0.58, 0.08, 0.08)
+  lefttopWing3.matrix.scale(0.58, 0.08, 0.08);
   g_shapesList.push(lefttopWing3);
 
   leftWing1.matrix = new Matrix4(leftinnerWingCoord);
@@ -469,7 +521,7 @@ function calculateDragon(){
 
   leftWing2.matrix = new Matrix4(leftinnerWingCoord);
   leftWing2.matrix.translate(-0.15, 0, 0);
-  leftWing2.matrix.scale(0.23, 0.22, 0.04)
+  leftWing2.matrix.scale(0.23, 0.22, 0.04);
   var leftWing2Coord = new Matrix4(leftWing2.matrix);
   g_shapesList.push(leftWing2);
 
@@ -480,7 +532,7 @@ function calculateDragon(){
 
   leftWing3.matrix = new Matrix4(leftinnerWingCoord);
   leftWing3.matrix.translate(-0.061, -0.066, 0);
-  leftWing3.matrix.scale(0.2, 0.22, 0.04)
+  leftWing3.matrix.scale(0.2, 0.22, 0.04);
   var leftWing3Coord = new Matrix4(leftWing3.matrix);
   g_shapesList.push(leftWing3);
 
@@ -491,7 +543,7 @@ function calculateDragon(){
 
   leftWing4.matrix = new Matrix4(leftinnerWingCoord);
   leftWing4.matrix.translate(-0.37, -0.13, 0);
-  leftWing4.matrix.scale(0.2, 0.17, 0.04)
+  leftWing4.matrix.scale(0.2, 0.17, 0.04);
   var leftWing4Coord = new Matrix4(leftWing4.matrix);
   g_shapesList.push(leftWing4);
 
@@ -502,7 +554,7 @@ function calculateDragon(){
 
   leftWing5.matrix = new Matrix4(leftinnerWingCoord);
   leftWing5.matrix.translate(-0.625, -0.18, 0);
-  leftWing5.matrix.scale(0.08, 0.18, 0.04)
+  leftWing5.matrix.scale(0.08, 0.18, 0.04);
   var leftWing5Coord = new Matrix4(leftWing5.matrix);
   g_shapesList.push(leftWing5);
 
@@ -511,34 +563,33 @@ function calculateDragon(){
   leftWingBack5.matrix.translate(-0.1, 0, 0.002);
   g_shapesList.push(leftWingBack5);
 
-
   //right wing
   rightinnerWing.matrix = new Matrix4(bodyCoord);
   rightinnerWing.matrix.translate(0.18, 0.18, 0.26);
-  rightinnerWing.matrix.translate(0, rightWingTranslate, 0)
+  rightinnerWing.matrix.translate(0, rightWingTranslate, 0);
   rightinnerWing.matrix.scale(-1, 1, 1);
   var rightinnerWingCoord = new Matrix4(rightinnerWing.matrix);
-  rightinnerWing.matrix.scale(0.08, 0.35, 0.08)
+  rightinnerWing.matrix.scale(0.08, 0.35, 0.08);
   g_shapesList.push(rightinnerWing);
 
   righttopWing1.matrix = new Matrix4(rightinnerWingCoord);
   righttopWing1.matrix.translate(-0.059, 0.15, 0);
-  righttopWing1.matrix.scale(0.20, 0.08, 0.08)
+  righttopWing1.matrix.scale(0.2, 0.08, 0.08);
   g_shapesList.push(righttopWing1);
 
   righttopWing2.matrix = new Matrix4(rightinnerWingCoord);
   righttopWing2.matrix.translate(-0.18, 0.31, 0);
-  righttopWing2.matrix.scale(0.08, 0.40, 0.08)
+  righttopWing2.matrix.scale(0.08, 0.4, 0.08);
   g_shapesList.push(righttopWing2);
 
   rightWingHorn.matrix = new Matrix4(rightinnerWingCoord);
   rightWingHorn.matrix.translate(-0.18, 0.56, 0);
-  rightWingHorn.matrix.scale(0.05, 0.06, 0.05)
+  rightWingHorn.matrix.scale(0.05, 0.06, 0.05);
   g_shapesList.push(rightWingHorn);
 
   righttopWing3.matrix = new Matrix4(rightinnerWingCoord);
   righttopWing3.matrix.translate(-0.428, 0.5, 0);
-  righttopWing3.matrix.scale(0.58, 0.08, 0.08)
+  righttopWing3.matrix.scale(0.58, 0.08, 0.08);
   g_shapesList.push(righttopWing3);
 
   rightWing1.matrix = new Matrix4(rightinnerWingCoord);
@@ -553,7 +604,7 @@ function calculateDragon(){
 
   rightWing2.matrix = new Matrix4(rightinnerWingCoord);
   rightWing2.matrix.translate(-0.15, 0, 0);
-  rightWing2.matrix.scale(0.23, 0.22, 0.04)
+  rightWing2.matrix.scale(0.23, 0.22, 0.04);
   var rightWing2Coord = new Matrix4(rightWing2.matrix);
   g_shapesList.push(rightWing2);
 
@@ -564,7 +615,7 @@ function calculateDragon(){
 
   rightWing3.matrix = new Matrix4(rightinnerWingCoord);
   rightWing3.matrix.translate(-0.061, -0.066, 0);
-  rightWing3.matrix.scale(0.2, 0.22, 0.04)
+  rightWing3.matrix.scale(0.2, 0.22, 0.04);
   var rightWing3Coord = new Matrix4(rightWing3.matrix);
   g_shapesList.push(rightWing3);
 
@@ -575,7 +626,7 @@ function calculateDragon(){
 
   rightWing4.matrix = new Matrix4(rightinnerWingCoord);
   rightWing4.matrix.translate(-0.37, -0.13, 0);
-  rightWing4.matrix.scale(0.2, 0.17, 0.04)
+  rightWing4.matrix.scale(0.2, 0.17, 0.04);
   var rightWing4Coord = new Matrix4(rightWing4.matrix);
   g_shapesList.push(rightWing4);
 
@@ -586,7 +637,7 @@ function calculateDragon(){
 
   rightWing5.matrix = new Matrix4(rightinnerWingCoord);
   rightWing5.matrix.translate(-0.625, -0.18, 0);
-  rightWing5.matrix.scale(0.08, 0.18, 0.04)
+  rightWing5.matrix.scale(0.08, 0.18, 0.04);
   var rightWing5Coord = new Matrix4(rightWing5.matrix);
   g_shapesList.push(rightWing5);
 
@@ -595,7 +646,6 @@ function calculateDragon(){
   rightWingBack5.matrix.translate(-0.1, 0, 0.002);
   g_shapesList.push(rightWingBack5);
 
-
   //Charizard Legs
 
   //left leg
@@ -603,33 +653,33 @@ function calculateDragon(){
   leftThigh.matrix.translate(-0.2, -0.33, 0);
   leftThigh.matrix.rotate(leftLegRotate, 1, 0, 0);
   var leftThighCoord = new Matrix4(leftThigh.matrix);
-  leftThigh.matrix.rotate(12, 1, 0, 0)
+  leftThigh.matrix.rotate(12, 1, 0, 0);
   leftThigh.matrix.scale(0.23, 0.3, 0.35);
   g_shapesList.push(leftThigh);
 
   leftShin.matrix = new Matrix4(leftThighCoord);
   leftShin.matrix.translate(0, -0.17, -0.026);
-  leftShin.matrix.scale(0.23, 0.15, 0.35)
+  leftShin.matrix.scale(0.23, 0.15, 0.35);
   g_shapesList.push(leftShin);
 
   leftFoot.matrix = new Matrix4(leftThighCoord);
-  leftFoot.matrix.translate(0, -0.207, -0.10);
-  leftFoot.matrix.scale(0.23, 0.08, 0.30)
+  leftFoot.matrix.translate(0, -0.207, -0.1);
+  leftFoot.matrix.scale(0.23, 0.08, 0.3);
   g_shapesList.push(leftFoot);
 
   leftToeNail1.matrix = new Matrix4(leftThighCoord);
   leftToeNail1.matrix.translate(-0.08, -0.207, -0.18);
-  leftToeNail1.matrix.scale(0.06, 0.06, 0.25)
+  leftToeNail1.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(leftToeNail1);
 
   leftToeNail2.matrix = new Matrix4(leftThighCoord);
   leftToeNail2.matrix.translate(0, -0.207, -0.18);
-  leftToeNail2.matrix.scale(0.06, 0.06, 0.25)
+  leftToeNail2.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(leftToeNail2);
 
   leftToeNail3.matrix = new Matrix4(leftThighCoord);
   leftToeNail3.matrix.translate(0.08, -0.207, -0.18);
-  leftToeNail3.matrix.scale(0.06, 0.06, 0.25)
+  leftToeNail3.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(leftToeNail3);
 
   //Right Leg
@@ -637,33 +687,33 @@ function calculateDragon(){
   rightThigh.matrix.translate(0.2, -0.33, 0);
   rightThigh.matrix.rotate(rightLegRotate, 1, 0, 0);
   var rightThighCoord = new Matrix4(rightThigh.matrix);
-  rightThigh.matrix.rotate(12, 1, 0, 0)
+  rightThigh.matrix.rotate(12, 1, 0, 0);
   rightThigh.matrix.scale(0.23, 0.3, 0.35);
   g_shapesList.push(rightThigh);
 
   rightShin.matrix = new Matrix4(rightThighCoord);
   rightShin.matrix.translate(0, -0.17, -0.026);
-  rightShin.matrix.scale(0.23, 0.15, 0.35)
+  rightShin.matrix.scale(0.23, 0.15, 0.35);
   g_shapesList.push(rightShin);
 
   rightFoot.matrix = new Matrix4(rightThighCoord);
-  rightFoot.matrix.translate(0, -0.207, -0.10);
-  rightFoot.matrix.scale(0.23, 0.08, 0.30)
+  rightFoot.matrix.translate(0, -0.207, -0.1);
+  rightFoot.matrix.scale(0.23, 0.08, 0.3);
   g_shapesList.push(rightFoot);
 
   rightToeNail1.matrix = new Matrix4(rightThighCoord);
   rightToeNail1.matrix.translate(-0.08, -0.207, -0.18);
-  rightToeNail1.matrix.scale(0.06, 0.06, 0.25)
+  rightToeNail1.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(rightToeNail1);
 
   rightToeNail2.matrix = new Matrix4(rightThighCoord);
   rightToeNail2.matrix.translate(0, -0.207, -0.18);
-  rightToeNail2.matrix.scale(0.06, 0.06, 0.25)
+  rightToeNail2.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(rightToeNail2);
 
   rightToeNail3.matrix = new Matrix4(rightThighCoord);
   rightToeNail3.matrix.translate(0.08, -0.207, -0.18);
-  rightToeNail3.matrix.scale(0.06, 0.06, 0.25)
+  rightToeNail3.matrix.scale(0.06, 0.06, 0.25);
   g_shapesList.push(rightToeNail3);
 
   //Charizard arms
@@ -672,125 +722,125 @@ function calculateDragon(){
   leftArm.matrix = new Matrix4(bodyCoord);
   leftArm.matrix.translate(-0.34, 0.2, 0);
   //rotate left arm
-  leftArm.matrix.rotate(leftArmRotate, 1, 0, 0)  
+  leftArm.matrix.rotate(leftArmRotate, 1, 0, 0);
   var leftArmCoord = new Matrix4(leftArm.matrix);
-  leftArm.matrix.scale(0.23, 0.10, 0.10);
+  leftArm.matrix.scale(0.23, 0.1, 0.1);
   g_shapesList.push(leftArm);
 
   leftforearm.matrix = new Matrix4(leftArmCoord);
   leftforearm.matrix.translate(-0.078, 0, -0.07);
   var leftforearmCoord = new Matrix4(leftforearm.matrix);
-  leftforearm.matrix.scale(0.10, 0.10, 0.23)
+  leftforearm.matrix.scale(0.1, 0.1, 0.23);
   g_shapesList.push(leftforearm);
 
   //left hand
   leftpalm.matrix = new Matrix4(leftforearmCoord);
   leftpalm.matrix.translate(0, 0, -0.1);
   var leftpalmCoord = new Matrix4(leftpalm.matrix);
-  leftpalm.matrix.scale(0.20, 0.15, 0.05)
+  leftpalm.matrix.scale(0.2, 0.15, 0.05);
   g_shapesList.push(leftpalm);
 
   leftknuckles.matrix = new Matrix4(leftpalmCoord);
   leftknuckles.matrix.translate(0, 0.05, -0.05);
   leftknuckles.matrix.scale(0.2, 0.05, 0.08);
-  g_shapesList.push(leftknuckles) 
+  g_shapesList.push(leftknuckles);
 
   leftfinger1.matrix = new Matrix4(leftpalmCoord);
   leftfinger1.matrix.translate(-0.07, 0.022, -0.07);
   leftfinger1.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(leftfinger1)
+  g_shapesList.push(leftfinger1);
 
   leftfinger2.matrix = new Matrix4(leftpalmCoord);
   leftfinger2.matrix.translate(0, 0.022, -0.08);
   leftfinger2.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(leftfinger2)
+  g_shapesList.push(leftfinger2);
 
   leftfinger3.matrix = new Matrix4(leftpalmCoord);
   leftfinger3.matrix.translate(0.07, 0.022, -0.07);
   leftfinger3.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(leftfinger3)
+  g_shapesList.push(leftfinger3);
 
   leftnail1.matrix = new Matrix4(leftpalmCoord);
   leftnail1.matrix.translate(-0.07, -0.03, -0.07);
   leftnail1.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(leftnail1)
+  g_shapesList.push(leftnail1);
 
   leftnail2.matrix = new Matrix4(leftpalmCoord);
   leftnail2.matrix.translate(0, -0.03, -0.08);
   leftnail2.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(leftnail2)
+  g_shapesList.push(leftnail2);
 
   leftnail3.matrix = new Matrix4(leftpalmCoord);
   leftnail3.matrix.translate(0.07, -0.03, -0.07);
   leftnail3.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(leftnail3)
+  g_shapesList.push(leftnail3);
 
-  //right arm 
+  //right arm
   rightArm.matrix = new Matrix4(bodyCoord);
   rightArm.matrix.translate(0.34, 0.2, 0);
-  rightArm.matrix.rotate(rightArmRotate, 1, 0, 0)  
+  rightArm.matrix.rotate(rightArmRotate, 1, 0, 0);
   var rightArmCoord = new Matrix4(rightArm.matrix);
-  rightArm.matrix.scale(0.23, 0.10, 0.10);
+  rightArm.matrix.scale(0.23, 0.1, 0.1);
   g_shapesList.push(rightArm);
 
   forearm.matrix = new Matrix4(rightArmCoord);
   forearm.matrix.translate(0.078, 0, -0.07);
   var forearmCoord = new Matrix4(forearm.matrix);
-  forearm.matrix.scale(0.10, 0.10, 0.23)
+  forearm.matrix.scale(0.1, 0.1, 0.23);
   g_shapesList.push(forearm);
 
   //right hand
   rightpalm.matrix = new Matrix4(forearmCoord);
   rightpalm.matrix.translate(0, 0, -0.1);
   var rightpalmCoord = new Matrix4(rightpalm.matrix);
-  rightpalm.matrix.scale(0.20, 0.15, 0.05)
+  rightpalm.matrix.scale(0.2, 0.15, 0.05);
   g_shapesList.push(rightpalm);
 
   rightknuckles.matrix = new Matrix4(rightpalmCoord);
   rightknuckles.matrix.translate(0, 0.05, -0.05);
   rightknuckles.matrix.scale(0.2, 0.05, 0.08);
-  g_shapesList.push(rightknuckles) 
+  g_shapesList.push(rightknuckles);
 
   finger1.matrix = new Matrix4(rightpalmCoord);
   finger1.matrix.translate(-0.07, 0.022, -0.07);
   finger1.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(finger1)
+  g_shapesList.push(finger1);
 
   rightfinger2.matrix = new Matrix4(rightpalmCoord);
   rightfinger2.matrix.translate(0, 0.022, -0.08);
   rightfinger2.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(rightfinger2)
+  g_shapesList.push(rightfinger2);
 
   rightfinger3.matrix = new Matrix4(rightpalmCoord);
   rightfinger3.matrix.translate(0.07, 0.022, -0.07);
   rightfinger3.matrix.scale(0.05, 0.1, 0.05);
-  g_shapesList.push(rightfinger3)
+  g_shapesList.push(rightfinger3);
 
   rightnail1.matrix = new Matrix4(rightpalmCoord);
   rightnail1.matrix.translate(-0.07, -0.03, -0.07);
   rightnail1.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(rightnail1)
+  g_shapesList.push(rightnail1);
 
   rightnail2.matrix = new Matrix4(rightpalmCoord);
   rightnail2.matrix.translate(0, -0.03, -0.08);
   rightnail2.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(rightnail2)
+  g_shapesList.push(rightnail2);
 
   rightnail3.matrix = new Matrix4(rightpalmCoord);
   rightnail3.matrix.translate(0.07, -0.03, -0.07);
   rightnail3.matrix.scale(0.051, 0.051, 0.0501);
-  g_shapesList.push(rightnail3)
+  g_shapesList.push(rightnail3);
 
   //Charizard neck
   neck.matrix = bodyCoord;
   neck.matrix.translate(0, 0.35, 0);
-  neck.matrix.rotate(neckRotate, 0, 1, 0)
+  neck.matrix.rotate(neckRotate, 0, 1, 0);
   var neckCoord = new Matrix4(neck.matrix);
   neck.matrix.scale(0.2, 0.2, 0.2);
   g_shapesList.push(neck);
 
   //Charizard head
-  head.matrix = new Matrix4(neckCoord)
+  head.matrix = new Matrix4(neckCoord);
   head.matrix.translate(0, 0.25, 0);
   var headCoord = new Matrix4(head.matrix);
   head.matrix.scale(0.3, 0.3, 0.3);
@@ -843,13 +893,13 @@ function calculateDragon(){
 
   ear1.matrix = new Matrix4(headCoord);
   ear1.matrix.translate(-0.08, 0.18, 0.1);
-  ear1.matrix.rotate(25, 1, 0, 0)
+  ear1.matrix.rotate(25, 1, 0, 0);
   ear1.matrix.scale(0.07, 0.18, 0.07);
   g_shapesList.push(ear1);
 
   ear2.matrix = new Matrix4(headCoord);
   ear2.matrix.translate(0.08, 0.18, 0.1);
-  ear2.matrix.rotate(25, 1, 0, 0)
+  ear2.matrix.rotate(25, 1, 0, 0);
   ear2.matrix.scale(0.07, 0.18, 0.07);
   g_shapesList.push(ear2);
 
@@ -882,8 +932,6 @@ function calculateDragon(){
   pupil2.matrix.translate(0.065, 0.05, -0.1601);
   pupil2.matrix.scale(-0.045, 0.035, 0.07);
   g_shapesList.push(pupil2);
-
-
 }
 
 // #region Global Dragon Variables
@@ -909,12 +957,22 @@ let flameJoint, flameBase, flameTop1, flameTop2, flameTop3;
 
 // Left Wing
 let leftinnerWing, lefttopWing1, lefttopWing2, leftWingHorn, lefttopWing3;
-let leftWing1, leftWingBack1, leftWing2, leftWingBack2, leftWing3, leftWingBack3;
+let leftWing1,
+  leftWingBack1,
+  leftWing2,
+  leftWingBack2,
+  leftWing3,
+  leftWingBack3;
 let leftWing4, leftWingBack4, leftWing5, leftWingBack5;
 
 // Right Wing
 let rightinnerWing, righttopWing1, righttopWing2, rightWingHorn, righttopWing3;
-let rightWing1, rightWingBack1, rightWing2, rightWingBack2, rightWing3, rightWingBack3;
+let rightWing1,
+  rightWingBack1,
+  rightWing2,
+  rightWingBack2,
+  rightWing3,
+  rightWingBack3;
 let rightWing4, rightWingBack4, rightWing5, rightWingBack5;
 
 // Left Leg
@@ -1068,7 +1126,6 @@ function buildDragon() {
 }
 
 function main() {
-  
   //set up canvas and gl variabls
   setupWegbGL();
   //set up actions for the HTML UI elements
@@ -1079,7 +1136,7 @@ function main() {
 
   resetSliders();
   resetCamera();
-  
+
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 

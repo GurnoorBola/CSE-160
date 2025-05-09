@@ -1,65 +1,120 @@
-<!DOCTYPE html>
-<html lang='en'>
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset='utf-8' />
+    <meta charset="utf-8" />
     <title>Paint</title>
   </head>
 
-  <body onload='main()'>
+  <body onload="main()">
     <style>
       canvas {
         cursor: none;
       }
     </style>
 
-    <canvas id='webgl' width='400' height='400'>
-        Please use a browser that supports 'canvas'
+    <canvas id="webgl" width="400" height="400">
+      Please use a browser that supports 'canvas'
     </canvas>
-    <p>
+    <p></p>
 
-    <p id ='numdot'> XXX </p>
-    
-    <button type='button' id='red'>Red</button>
-    <button type='button' id='green'>Green</button>
-    <button type='button' id='blue'>Blue</button>
-    <button type='button' id='bgColor'>BG</button>
-    <p>
-    
-    <button type='button' id='undo'>Undo</button>
-    <button type='button' id='redo'>Redo</button> 
-    <button type='button' id='clearButton'>Clear</button>
-    <button type='button' id='drawing'>Drawing</button>
-    <p>
+    <p id="numdot">XXX</p>
 
-    <button type='button' id='pointButton'>Point</button>
-    <button type='button' id='triButton'>Triangle</button>
-    <button type='button' id='circleButton'>Circle</button>
+    <button type="button" id="red">Red</button>
+    <button type="button" id="green">Green</button>
+    <button type="button" id="blue">Blue</button>
+    <button type="button" id="bgColor">BG</button>
+    <p>
+      <button type="button" id="undo">Undo</button>
+      <button type="button" id="redo">Redo</button>
+      <button type="button" id="clearButton">Clear</button>
+      <button type="button" id="drawing">Drawing</button>
+    </p>
 
     <p>
-    <label style="display: inline-block; width: 50px;">Red</label>
-    <input type='range' min='0' max='100' value='100' class='slider' id='redSlide'>
-    <p>
-    <label style="display: inline-block; width: 50px;">Green</label>
-    <input type='range' min='0' max='100' value='100' class='slider' id='greenSlide'>
-    <p>
-    <label style="display: inline-block; width: 50px;">Blue</label>
-    <input type='range' min='0' max='100' value='100' class='slider' id='blueSlide'>
-    <p>
-    <label style="display: inline-block; width: 50px;">Alpha</label>
-    <input type='range' min='0' max='100' value='100' class='slider' id='tSlide'>
+      <button type="button" id="pointButton">Point</button>
+      <button type="button" id="triButton">Triangle</button>
+      <button type="button" id="circleButton">Circle</button>
+    </p>
 
     <p>
-    <label style="display: inline-block; width: 50px;">Size</label>
-    <input type='range' min='5' max='40' value='5' class='slider' id='sizeSlide'>
+      <label style="display: inline-block; width: 50px">Red</label>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="redSlide"
+      />
+    </p>
+
     <p>
-    <label style='display: inline-block; width: 50px;'>Circle Detail</label>
-    <input type='range' min='10' max='60' value='10' class='slider' id='detailSlide'>
+      <label style="display: inline-block; width: 50px">Green</label>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="greenSlide"
+      />
+    </p>
+
     <p>
-    
-    <br>
-    <p>Gurnoor Bola <br>gsbola@ucsc.edu</p>
-    <p>Notes to Grader: <br><br>Awesome features:
-    <ul> 
+      <label style="display: inline-block; width: 50px">Blue</label>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="blueSlide"
+      />
+    </p>
+
+    <p>
+      <label style="display: inline-block; width: 50px">Alpha</label>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="tSlide"
+      />
+    </p>
+
+    <p>
+      <label style="display: inline-block; width: 50px">Size</label>
+      <input
+        type="range"
+        min="5"
+        max="40"
+        value="5"
+        class="slider"
+        id="sizeSlide"
+      />
+    </p>
+
+    <p>
+      <label style="display: inline-block; width: 50px">Circle Detail</label>
+      <input
+        type="range"
+        min="10"
+        max="60"
+        value="10"
+        class="slider"
+        id="detailSlide"
+      />
+    </p>
+
+    <p>
+      <br />
+    </p>
+
+    <p>Gurnoor Bola <br />gsbola@ucsc.edu</p>
+    <p>Notes to Grader: <br /><br />Awesome features:</p>
+    <ul>
       <li>cursor that displays the shape you are currently set to place</li>
       <li>undo</li>
       <li>redo</li>
@@ -67,15 +122,15 @@
       <li>transparency slider</li>
     </ul>
 
-    <p>Drawing inspo: </p>
-    <img src='images/bfly.jpg' width='250' height='250' alt='butterfly'>
-    <script src='lib/webgl-utils.js'></script>
-    <script src='lib/webgl-debug.js'></script>
-    <script src='lib/cuon-utils.js'></script>
-    <script src='src/Butterfly.js'></script>
-    <script src='src/Circle.js'></script>
-    <script src='src/Triangle.js'></script>
-    <script src='src/Point.js'></script>
-    <script src='src/asg1.js'></script>
+    <p>Drawing inspo:</p>
+    <img src="images/bfly.jpg" width="250" height="250" alt="butterfly" />
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="src/Butterfly.js"></script>
+    <script src="src/Circle.js"></script>
+    <script src="src/Triangle.js"></script>
+    <script src="src/Point.js"></script>
+    <script src="src/asg1.js"></script>
   </body>
 </html>
