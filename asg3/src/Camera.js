@@ -2,7 +2,7 @@ let camCanvas = document.getElementById('webgl');
 class Camera{
     constructor (){
         this.fov = 60;
-        this.eye = new Vector3([0,0,2]);
+        this.eye = new Vector3([0,0, 2]);
         this.at = new Vector3([0, 0, 0]);
         this.up = new Vector3([0, 1, 0]);
         this.viewMatrix = new Matrix4().setLookAt(...this.eye.elements, ...this.at.elements, ...this.up.elements);

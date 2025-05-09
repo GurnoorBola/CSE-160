@@ -263,6 +263,7 @@ function tick(){
     camera.panDown(deltaTime);
   }
   renderAllChunks();
+  checkLookBlock(camera);
   requestAnimationFrame(tick);
 }
 
@@ -284,7 +285,7 @@ function main() {
   // for (let x = 0; x < chunkSize; x++) {
   //   for (let y = 0; y < chunkSize; y++) {
   //     for (let z = 0; z < chunkSize; z++) {
-  //       addBlock(chunk1, BLOCK_TYPES.LUCKY, x, y, z);
+  //       addChunkBlock(chunk1, BLOCK_TYPES.LUCKY, x, y, z);
   //     }
   //   }
   // }
@@ -312,7 +313,6 @@ function main() {
   chunk2.build();
   chunk3.build();
   chunk4.build();
-
 
   tick();
 
