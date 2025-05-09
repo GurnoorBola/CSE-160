@@ -177,6 +177,39 @@ function addActionsForHTML(){
     keysPressed[e.code] = false;
   }
 
+  function getBlockInFront(camera, cubeSize, distance = 2) {
+    let forward = new Vector3();
+    forward.set(camera.at).sub(camera.eye).normalize();
+
+    let worldPos = new Vector3();
+    worldPos.set(camera.eye).add(new Vector3().set(forward).mul(cubeSize * distance));
+
+    let x = Math.floor(worldPos.elements[0] / cubeSize);
+    let y = Math.floor(worldPos.elements[1] / cubeSize);
+    let z = Math.floor(worldPos.elements[2] / cubeSize);
+
+    return { x, y, z };
+  }
+
+
+function mouseClick(e) {
+  const { x, y, z } = getBlockInFront(camera, cubeSize);
+
+  if (e.button === 0) {
+    // console.log("Place at", x, y, z);
+    let chunk = addWorldBlock(BLOCK_TYPES.LUCKY, x, y, z);
+    if (chunk) chunk.build();
+  }
+
+  if (e.button === 2) {
+    // console.log("Delete at", x, y, z);
+    let chunk = delWorldBlock(x, y, z);
+    if (chunk) chunk.build();
+  }
+}
+
+
+
   document.addEventListener('pointerlockchange', () => {
     if (document.pointerLockElement === canvas) {
       document.addEventListener('mousemove', onMouseMove);
@@ -185,12 +218,16 @@ function addActionsForHTML(){
       
       document.addEventListener('keyup', keyPressUp);
 
+      canvas.addEventListener('mousedown', mouseClick);
+
     } else {
       document.removeEventListener('mousemove', onMouseMove);
 
       document.removeEventListener('keydown', keyPressDown);
       
       document.removeEventListener('keyup', keyPressUp);
+
+      canvas.addEventListener('mousedown', mouseClick);
     }
   });
 
@@ -263,7 +300,6 @@ function tick(){
     camera.panDown(deltaTime);
   }
   renderAllChunks();
-  checkLookBlock(camera);
   requestAnimationFrame(tick);
 }
 

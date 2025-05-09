@@ -44,9 +44,9 @@ function delChunkBlock(chunk, x, y, z) {
 function addWorldBlock(type, x, y, z){
     for (let i = 0; i < g_chunksList.length; i++) {
         let chunk = g_chunksList[i];
-        if (x >= chunk.x && x <= (chunk.x + chunkSize) && 
-            y >= chunk.y && y <= (chunk.y + chunkSize) && 
-            z >= chunk.z && z <= (chunk.z + chunkSize)
+        if (x >= chunk.x && x < (chunk.x + chunkSize) && 
+            y >= chunk.y && y < (chunk.y + chunkSize) && 
+            z >= chunk.z && z < (chunk.z + chunkSize)
         ){
             //convert world coords to chunk coords
             let chunkX = x%chunkSize;
@@ -58,20 +58,21 @@ function addWorldBlock(type, x, y, z){
 
             let index = getIndex(chunkX, chunkY, chunkZ);
             chunk.blocks[index] = type;
-            // console.log(`Found Chunk: at index ${index}`);
-            // console.log(chunk);
-            return;
+            // console.log(`Adding block at (${x}, ${y}, ${z})`);
+            // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
+            return chunk;
         }
     }
     console.log('invalid coordinates');
+    return false;
 }
 
 function delWorldBlock(x, y, z) {
     for (let i = 0; i < g_chunksList.length; i++) {
         let chunk = g_chunksList[i];
-        if (x >= chunk.x && x <= (chunk.x + chunkSize) && 
-            y >= chunk.y && y <= (chunk.y + chunkSize) && 
-            z >= chunk.z && z <= (chunk.z + chunkSize)
+        if (x >= chunk.x && x < (chunk.x + chunkSize) && 
+            y >= chunk.y && y < (chunk.y + chunkSize) && 
+            z >= chunk.z && z < (chunk.z + chunkSize)
         ){
             //convert world coords to chunk coords
             let chunkX = x%chunkSize;
@@ -83,12 +84,13 @@ function delWorldBlock(x, y, z) {
 
             let index = getIndex(chunkX, chunkY, chunkZ);
             chunk.blocks[index] = BLOCK_TYPES.AIR;
-            // console.log(`Found Chunk: at index ${index}`);
-            // console.log(chunk);
-            return;
+            // console.log(`Deleting block at (${x}, ${y}, ${z})`);
+            // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
+            return chunk;
         }
     }
     console.log('invalid coordinates');
+    return false;
 }
 
 function checkLookBlock(camera) {
@@ -96,58 +98,8 @@ function checkLookBlock(camera) {
     forward.set(camera.at);
     forward.sub(camera.eye);
     forward.normalize();
-    let increment = 0.05;
-    let distance = 5;
-
-    for (let t = 0; t < distance; t += increment) {
-        let lookingPoint = new Vector3();
-        let scaleForward = new Vector3();
-        scaleForward.set(forward);
-        lookingPoint.set(camera.eye).add(scaleForward.mul(t));
-        let x = Math.floor(lookingPoint.elements[0]);
-        let y = Math.floor(lookingPoint.elements[1]);
-        let z = Math.floor(lookingPoint.elements[2]);
-
-        console.log(lookingPoint.elements);
-        if (hasBlock(x, y, z)){
-            console.log(`true: ${x} ${y} ${z}`);
-            return [x, y, z];
-        }
-    }
-    return false;
 }
 
-//returns true if block exists at coordinates and false if it doesnt 
-function hasBlock(x, y, z){
-    for (let i = 0; i < g_chunksList.length; i++) {
-        let chunk = g_chunksList[i];
-        if (x >= chunk.x && x <= (chunk.x + chunkSize) && 
-            y >= chunk.y && y <= (chunk.y + chunkSize) && 
-            z >= chunk.z && z <= (chunk.z + chunkSize)
-        ){
-            //convert world coords to chunk coords
-            let chunkX = x%chunkSize;
-            let chunkY = y%chunkSize;
-            let chunkZ = z%chunkSize;
-            if (chunkX < 0) chunkX += chunkSize;
-            if (chunkY < 0) chunkY += chunkSize;
-            if (chunkZ < 0) chunkZ += chunkSize;
-
-            let index = getIndex(chunkX, chunkY, chunkZ);
-            if (chunk.blocks[index] != 0) {
-                return true;
-            } else {
-                return false;
-            }
-            // console.log(`Found Chunk: at index ${index}`);
-            // console.log(chunk);
-        }
-    }
-}
-
-function removeWorldBlock() {
-
-}
 
 class Chunk {
     constructor(origin) {
