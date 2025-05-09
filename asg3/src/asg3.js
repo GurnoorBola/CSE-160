@@ -280,17 +280,38 @@ function main() {
 
   //Proof of concept
 
-  let chunk = new Chunk([0, 0, 0]);
-  for (let x = 0; x < chunkSize; x++) {
-    for (let y = 0; y < chunkSize; y++) {
-      for (let z = 0; z < chunkSize; z++) {
-        addBlock(chunk, BLOCK_TYPES.LUCKY, x, y, z);
-      }
-    }
-  }
-  console.log(chunk.blocks);
-  chunk.build();
-  g_chunksList.push(chunk);
+  let chunk1 = new Chunk([0, 0, 0]);
+  // for (let x = 0; x < chunkSize; x++) {
+  //   for (let y = 0; y < chunkSize; y++) {
+  //     for (let z = 0; z < chunkSize; z++) {
+  //       addBlock(chunk1, BLOCK_TYPES.LUCKY, x, y, z);
+  //     }
+  //   }
+  // }
+  console.log(chunk1.blocks);
+
+  let chunk2 = new Chunk([-16, 0, 0]);
+  console.log(chunk2.blocks);
+
+  let chunk3 = new Chunk([0, 0, -16]);
+  console.log(chunk3.blocks);
+
+  let chunk4 = new Chunk([-16, 0, -16]);
+  console.log(chunk4.blocks);
+
+  g_chunksList.push(chunk1);
+  g_chunksList.push(chunk2);
+  g_chunksList.push(chunk3);
+  g_chunksList.push(chunk4);
+
+  addWorldBlock(BLOCK_TYPES.LUCKY, -1, 1, -1)
+  addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -1)
+  addWorldBlock(BLOCK_TYPES.LUCKY, 0, 0, -16)
+
+  chunk1.build();
+  chunk2.build();
+  chunk3.build();
+  chunk4.build();
 
 
   tick();

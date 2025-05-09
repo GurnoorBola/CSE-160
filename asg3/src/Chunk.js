@@ -12,6 +12,7 @@ const BLOCK_DATA = {
     }
 }
 
+const worldSize = 32;
 const chunkSize = 16
 const cubeSize = 0.5
 
@@ -30,6 +31,30 @@ function addBlock(chunk, type, x, y, z){
     if (x < chunkSize && y < chunkSize && z < chunkSize){
         let index = getIndex(x, y, z);
         chunk.blocks[index] = type;
+    }
+}
+
+function addWorldBlock(type, x, y, z){
+    for (let i = 0; i < g_chunksList.length; i++) {
+        let chunk = g_chunksList[i];
+        if (x >= chunk.x && x <= (chunk.x + chunkSize) && 
+            y >= chunk.y && y <= (chunk.y + chunkSize) && 
+            z >= chunk.z && z <= (chunk.z + chunkSize)
+        ){
+            //convert world coords to chunk coords
+            let chunkX = x%chunkSize;
+            let chunkY = y%chunkSize;
+            let chunkZ = z%chunkSize;
+            if (chunkX < 0) chunkX += chunkSize;
+            if (chunkY < 0) chunkY += chunkSize;
+            if (chunkZ < 0) chunkZ += chunkSize;
+
+            let index = getIndex(chunkX, chunkY, chunkZ);
+            chunk.blocks[index] = type;
+            // console.log(`Found Chunk: at index ${index}`);
+            // console.log(chunk);
+            return;
+        } 
     }
 }
 
@@ -58,6 +83,9 @@ class Chunk {
         const stride = 10;
 
         var FSIZE = Float32Array.BYTES_PER_ELEMENT;
+        
+        //Bind the buffer object to target
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.chunkBuffer);
     
         // Assign the buffer object to a_Postion variable
         gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE*stride, 0);
@@ -95,6 +123,7 @@ class Chunk {
                 let cube = new Cube(this, BLOCK_DATA[blockType].uv, BLOCK_DATA[blockType].color, BLOCK_DATA[blockType].texWeight);
                 let xyz = getCoords(i)
                 cube.matrix.scale(cubeSize, cubeSize, cubeSize);
+                cube.matrix.translate(this.x, this.y, this.z);
                 cube.matrix.translate(xyz[0], xyz[1], xyz[2]);
                 cube.compute();
             }
