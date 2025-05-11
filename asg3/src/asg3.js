@@ -128,7 +128,7 @@ function initTextures() {
     sendTextureToGLSL(image);
     renderAllChunks();
   };
-  image.src = "textureAtlas.png";
+  image.src = "./textures/texture_atlas.png";
 
   return true;
 }
@@ -143,7 +143,8 @@ function sendTextureToGLSL(image) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   gl.uniform1i(u_Sampler0, 0);
   console.log("finished loadTexture");
@@ -263,6 +264,48 @@ function renderAllChunks() {
   );
 }
 
+
+//will only render chunks within a certain render distance from camera
+let renderDistance = chunkSize*2;
+function renderNecessaryChunks() {
+  //check the time at the start of this function
+  var startTime = performance.now();
+
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, camera.projMatrix.elements);
+
+  gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // var len = g_points.length;
+  var len = g_chunksList.length;
+  for (var i = 0; i < len; i++) {
+    if ((g_chunksList[i].x/2) > camera.at.elements[0]+renderDistance || 
+        (g_chunksList[i].x/2) < camera.at.elements[0]-renderDistance ||
+        (g_chunksList[i].y/2) > camera.at.elements[1]+renderDistance || 
+        (g_chunksList[i].y/2) < camera.at.elements[1]-renderDistance ||
+        (g_chunksList[i].z/2) > camera.at.elements[2]+renderDistance || 
+        (g_chunksList[i].z/2) < camera.at.elements[2]-renderDistance
+      ) {
+        continue;
+    } else {
+        g_chunksList[i].render();
+    }
+  }
+
+  var duration = performance.now() - startTime;
+  sendTextToHTML(
+    "numdot: " +
+      len +
+      " ms: " +
+      Math.floor(duration) +
+      " fps: " +
+      Math.floor(10000 / duration) / 10,
+    "numdot",
+  );
+}
+
 function sendTextToHTML(text, htmlID) {
   var htmlElm = document.getElementById(htmlID);
   if (!htmlElm) {
@@ -304,7 +347,8 @@ function tick() {
   if (keysPressed["KeyT"]) {
     camera.panDown(deltaTime);
   }
-  renderAllChunks();
+  //renderAllChunks();
+  renderNecessaryChunks();
   requestAnimationFrame(tick);
 }
 

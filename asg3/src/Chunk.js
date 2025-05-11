@@ -1,3 +1,19 @@
+const chunkSize = 16;
+const worldSize = chunkSize * 16;
+const cubeSize = 0.5;
+
+
+//gets uvs for textures in texture_atlas.json
+let atlasHeight = 64;
+let atlasWidth = 64;
+function getUVs(x, y, w, h) {
+    let originX = x/atlasWidth;
+    let originY = (atlasHeight - (y + h))/atlasHeight;
+    let edgeX = (x+w)/atlasWidth;
+    let edgeY = (atlasHeight-y)/atlasHeight;
+    return [originX, originY, edgeX, originY, edgeX, edgeY, originX, edgeY]
+}
+
 const BLOCK_TYPES = {
   AIR: 0,
   LUCKY: 1,
@@ -5,49 +21,19 @@ const BLOCK_TYPES = {
   DIRT: 3,
 };
 
-const sheetSize = 2048;
-
-const BLOCK_DATA = {
+let BLOCK_DATA = {
   [BLOCK_TYPES.LUCKY]: {
     name: "lucky",
     color: [1, 0, 0, 1],
     uv: Array(6)
       .fill()
-      .map(() => [
-        0.312744140625, 0.562744140625, 0.437255859375, 0.562744140625,
-        0.437255859375, 0.687255859375, 0.312744140625, 0.687255859375,
-      ]),
+      .map(() => getUVs(23, 3, 16, 16)),
     texWeight: 1.0,
   },
   [BLOCK_TYPES.GRASS]: {
     name: "grass",
     color: [0, 1, 0, 1],
-    uv: [
-      [
-        0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625,
-        0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375,
-      ],
-      [
-        0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625,
-        0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375,
-      ],
-      [
-        0.750244140625, 0.750244140625, 0.999755859375, 0.750244140625,
-        0.999755859375, 0.999755859375, 0.750244140625, 0.999755859375,
-      ],
-      [
-        0.250244140625, 0.750244140625, 0.499755859375, 0.750244140625,
-        0.499755859375, 0.999755859375, 0.250244140625, 0.999755859375,
-      ],
-      [
-        0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625,
-        0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375,
-      ],
-      [
-        0.000244140625, 0.500244140625, 0.249755859375, 0.500244140625,
-        0.249755859375, 0.749755859375, 0.000244140625, 0.749755859375,
-      ],
-    ],
+    uv: [getUVs(3, 23, 16, 16), getUVs(3, 23, 16, 16), getUVs(3, 43, 16, 16), getUVs(3, 3, 16, 16), getUVs(3, 23, 16, 16), getUVs(3, 23, 16, 16)],
     texWeight: 1.0,
   },
   [BLOCK_TYPES.DIRT]: {
@@ -55,16 +41,10 @@ const BLOCK_DATA = {
     color: [1, 0, 0, 1],
     uv: Array(6)
       .fill()
-      .map(() => [
-        0.250244140625, 0.750244140625, 0.499755859375, 0.750244140625,
-        0.499755859375, 0.999755859375, 0.250244140625, 0.999755859375,
-      ]),
+      .map(() => getUVs(3, 3, 16, 16)),
     texWeight: 1.0,
   },
 };
-const chunkSize = 16;
-const worldSize = chunkSize * 20;
-const cubeSize = 0.5;
 
 function getIndex(x, y, z) {
   return x + y * chunkSize + z * chunkSize * chunkSize;
