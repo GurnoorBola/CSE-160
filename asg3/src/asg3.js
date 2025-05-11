@@ -266,6 +266,7 @@ function renderAllChunks() {
 
 
 //will only render chunks within a certain render distance from camera
+let sky;
 let renderDistance = chunkSize*2;
 function renderNecessaryChunks() {
   //check the time at the start of this function
@@ -277,6 +278,14 @@ function renderNecessaryChunks() {
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  sky.reset();
+  sky.matrix.translate(camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
+  sky.matrix.scale(renderDistance*2, renderDistance*2, renderDistance*2);
+  sky.compute();
+  gl.disable(gl.CULL_FACE);
+  sky.render();
+  gl.enable(gl.CULL_FACE);
 
   // var len = g_points.length;
   var len = g_chunksList.length;
@@ -367,6 +376,8 @@ function main() {
   chunkify();
 
   buildGround();
+
+  sky = new Sky([0.0, 0.0, 0.2, 1.0]);
 
   // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
   // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)

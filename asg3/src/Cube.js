@@ -5,19 +5,12 @@ class Cube {
 
     this.baseColor = color;
 
-    var vertexUVBuffer = gl.createBuffer();
-    if (!vertexUVBuffer) {
-      console.log("Failed to create the buffer object");
-      return -1;
-    }
-    this.vertexUVBuffer = vertexUVBuffer;
     this.vertices = new Float32Array([
       //UV structure: array containing arrays of uv coords of the four corners of the square texture.
       //order is front, back, top, bot, right, left
 
       // Front face (z = +0.5)
-      -0.5,
-      -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,
+      -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,
 
       -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
 
@@ -138,10 +131,6 @@ class Cube {
       uv[5][6],
       uv[5][7],
     ]);
-    //Bind the buffer object to target
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexUVBuffer);
-    //Write data into the buffer object
-    gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
 
     this.texColorWeight = textureWeight;
     this.matrix = new Matrix4();
