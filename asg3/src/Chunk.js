@@ -146,10 +146,12 @@ function placeWorldBlock(type, x, y, z) {
       if (chunkZ < 0) chunkZ += chunkSize;
 
       let index = getIndex(chunkX, chunkY, chunkZ);
-      chunk.blocks[index] = type;
-      // console.log(`Adding block at (${x}, ${y}, ${z})`);
-      // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
-      chunk.build();
+      if (chunk.blocks[index] == BLOCK_TYPES.AIR){
+        chunk.blocks[index] = type;
+        // console.log(`Adding block at (${x}, ${y}, ${z})`);
+        // console.log(`Matched chunk (${chunk.x}, ${chunk.y}, ${chunk.z})`);
+        chunk.build();
+      }
       return;
     }
   }
