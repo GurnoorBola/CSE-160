@@ -19,6 +19,9 @@ const BLOCK_TYPES = {
   LUCKY: 1,
   GRASS: 2,
   DIRT: 3,
+  STONE: 4,
+  OAK_PLANK: 5,
+  PUMPKIN: 6
 };
 
 let BLOCK_DATA = {
@@ -42,6 +45,28 @@ let BLOCK_DATA = {
     uv: Array(6)
       .fill()
       .map(() => getUVs(3, 3, 16, 16)),
+    texWeight: 1.0,
+  },
+  [BLOCK_TYPES.STONE]: {
+    name: "stone",
+    color: [1, 1, 1, 1],
+    uv: Array(6)
+      .fill()
+      .map(() => getUVs(43, 43, 16, 16)),
+    texWeight: 1.0,
+  },
+  [BLOCK_TYPES.OAK_PLANK]: {
+    name: "oak plank",
+    color: [1, 0, 0, 1],
+    uv: Array(6)
+      .fill()
+      .map(() => getUVs(43, 3, 16, 16)),
+    texWeight: 1.0,
+  },
+  [BLOCK_TYPES.PUMPKIN]: {
+    name: "pumpkin",
+    color: [1, 0.5, 0, 1],
+    uv: [getUVs(23, 23, 16, 16), getUVs(23, 43, 16, 16), getUVs(43, 23, 16, 16), getUVs(23, 43, 16, 16), getUVs(23, 43, 16, 16), getUVs(23, 43, 16, 16)],
     texWeight: 1.0,
   },
 };
@@ -213,18 +238,6 @@ function chunkify() {
         console.log(`Created chunk at ${x}, ${y} ${z}`);
       }
     }
-  }
-}
-
-function buildGround() {
-  const half = worldSize / 2;
-  for (let x = -half; x < half; x++) {
-    for (let z = -half; z < half; z++) {
-      addWorldBlock(BLOCK_TYPES.GRASS, x, 0, z);
-    }
-  }
-  for (let i = 0; i < g_chunksList.length; i++) {
-    g_chunksList[i].build();
   }
 }
 

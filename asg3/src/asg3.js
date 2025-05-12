@@ -143,7 +143,7 @@ function sendTextureToGLSL(image) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   gl.uniform1i(u_Sampler0, 0);
@@ -202,7 +202,7 @@ function addActionsForHTML() {
 
     if (e.button === 0) {
       // console.log("Place at", x, y, z);
-      placeWorldBlock(BLOCK_TYPES.LUCKY, x, y, z);
+      placeWorldBlock(BLOCK_TYPES.PUMPKIN, x, y, z);
     }
 
     if (e.button === 2) {
@@ -267,7 +267,7 @@ function renderAllChunks() {
 
 //will only render chunks within a certain render distance from camera
 let sky;
-let renderDistance = chunkSize*2;
+let renderDistance = chunkSize*1;
 function renderNecessaryChunks() {
   //check the time at the start of this function
   var startTime = performance.now();
@@ -323,6 +323,141 @@ function sendTextToHTML(text, htmlID) {
   htmlElm.innerHTML = text;
 }
 
+function buildAllChunks() {
+  for (let i = 0; i < g_chunksList.length; i++) {
+    g_chunksList[i].build();
+  }
+}
+
+function buildGround() {
+  const half = worldSize / 2;
+  for (let x = -half; x < half; x++) {
+    for (let z = -half; z < half; z++) {
+      addWorldBlock(BLOCK_TYPES.GRASS, x, 0, z);
+    }
+  }
+}
+
+const sizeX = 100;
+const sizeZ = 100;
+const sizeY = 20;
+
+let map = Array(sizeY).fill().map(() =>
+  Array(sizeZ).fill().map(() =>
+    Array(sizeX).fill(0)
+  )
+);
+
+const centerX = Math.floor(sizeX / 2);
+const centerZ = Math.floor(sizeZ / 2);
+
+for (let z = 0; z < sizeZ; z++) {
+  for (let x = 0; x < sizeX; x++) {
+    const dx = x - centerX;
+    const dz = z - centerZ;
+
+    const noise = (Math.random() - 0.5) * 1.5; 
+    const height = Math.floor(3 + 2 * Math.sin(dx * 0.4) + 1.5 * Math.cos(dz * 0.3) + noise);
+
+    for (let y = 0; y < sizeY; y++) {
+      if (y < height - 2) map[y][z][x] = 4; // STONE
+      else if (y < height - 1) map[y][z][x] = 3; // DIRT
+      else if (y < height) map[y][z][x] = 2; // GRASS
+    }
+  }
+}
+
+for (let z = 0; z < sizeZ; z++) {
+  for (let x = 0; x < sizeX; x++) {
+    for (let y = sizeY - 1; y >= 0; y--) {
+      if (map[y][z][x] === BLOCK_TYPES.GRASS) {
+        let rand = Math.random();
+        if (y > 3 && y < 20 && rand < 0.025) {
+          map[y + 1][z][x] = BLOCK_TYPES.PUMPKIN;
+        }
+        if (y > 3 && y < 20 && rand > 0.025 && rand < 0.042) {
+          map[y + 1][z][x] = BLOCK_TYPES.LUCKY;
+        }
+        break;
+      }
+    }
+  }
+}
+
+let castle = [
+  [],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 5, 5, 5, 5, 5, 5, 5, 5, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    [4, 4, 4, 4, 0, 0, 4, 4, 4, 4],
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    [4, 4, 4, 4, 0, 0, 4, 4, 4, 4],
+  ],
+];
+
+function buildMap(map) {
+  //map is built in layers starting from the origin outwards. 
+  for (let y = 0; y < map.length; y++) {
+    for (let z = 0; z < map[y].length; z++) {
+      for (let x = 0; x < map[y][z].length; x++) {
+        if (map[y][z][x] == 0){
+          continue;
+        }
+        addWorldBlock(map[y][z][x], x, y, z);
+      }
+    }
+  }
+}
+
+
 let lastFrame = performance.now() / 1000.0;
 let now;
 let deltaTime;
@@ -377,7 +512,13 @@ function main() {
 
   buildGround();
 
-  sky = new Sky([0.0, 0.0, 0.2, 1.0]);
+  buildMap(map);
+  buildMap(castle);
+
+  buildAllChunks();
+
+
+  sky = new Sky([101/255,153/255,253/255, 1.0]);
 
   // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
   // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
