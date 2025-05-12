@@ -12,16 +12,58 @@
       } */
     </style>
 
-    <canvas id="webgl" width="400" height="400" tabindex="0">
+    <canvas id="webgl" width='800' height='450' tabindex="0">
       Please use a browser that supports 'canvas'
     </canvas>
-    <p></p>
 
     <p id="numdot">XXX</p>
 
+    <p>
+       <label style="display: inline-block; width: 50px">Render Distance</label>
+      <input
+        type="range"
+        min="1"
+        max="3"
+        value="2"
+        class="slider"
+        id="render"
+      />
+    </p>
+    <p style="max-width: 600px; line-height: 1.5;">
+      <strong>Story:</strong><br>
+      The pumpking has gone mad and has sent his minions to the holy tower to get back what he believes to be his stolen lucky blocks.<br>
+      It remains to be seen how this battle will end.
+    </p>
+
+    <p style="max-width: 600px; line-height: 1.5;">
+      <strong>Controls:</strong><br>
+      Use WASD to move around the world. Use your mouse or Q & E to turn. Use left click to place block and right click to remove.<br>
+      Click num keys 1–6 to change which block you place.
+    </p>
+
+    <p style="max-width: 600px; line-height: 1.5;">
+      <strong>Blocks:</strong><br>
+      <ul>
+        <li>1: Lucky Block</li>
+        <li>2: Grass Block</li>
+        <li>3: Dirt Block</li>
+        <li>4: Stone Block</li>
+        <li>5: Wooden Plank</li>
+        <li>6: Pumpkin</li>
+      </ul>
+    </p>
+
+
     <br />
     <p>Gurnoor Bola <br />gsbola@ucsc.edu</p>
-    <p>Notes to Grader:</p>
+    <p style="max-width: 600px; line-height: 1.5;"><strong>Notes to Grader: </strong></p>
+    <p style="max-width: 600px; line-height: 1.5;">
+      Wow Point: My virtual world uses a chunk based rendering system in order to maximize performance. This allows users to place blocks in an enormous world with very little performance impact. 
+
+      <br><br>
+      Additionally,  terrain is generated semi randomly creating similar but subtly different hill patterns. 
+    </p>
+    
 
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>

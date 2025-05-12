@@ -150,8 +150,10 @@ function sendTextureToGLSL(image) {
   console.log("finished loadTexture");
 }
 
-//Constants
+//gloabls
 let focused = false;
+let chosenBlock = BLOCK_TYPES.STONE;
+
 
 const keysPressed = {};
 //set up actions for the HTML UI elements
@@ -160,6 +162,13 @@ function addActionsForHTML() {
 
   canvas.addEventListener("click", () => {
     canvas.requestPointerLock();
+  });
+
+
+  let renderSlider = document.getElementById("render");
+  renderSlider.value = 2;
+  renderSlider.addEventListener("input", function () {
+    renderDistance = chunkSize * renderSlider.value;
   });
 
   function onMouseMove(e) {
@@ -202,7 +211,7 @@ function addActionsForHTML() {
 
     if (e.button === 0) {
       // console.log("Place at", x, y, z);
-      placeWorldBlock(BLOCK_TYPES.PUMPKIN, x, y, z);
+      placeWorldBlock(chosenBlock, x, y, z);
     }
 
     if (e.button === 2) {
@@ -267,7 +276,7 @@ function renderAllChunks() {
 
 //will only render chunks within a certain render distance from camera
 let sky;
-let renderDistance = chunkSize*1;
+let renderDistance = chunkSize*2;
 function renderNecessaryChunks() {
   //check the time at the start of this function
   var startTime = performance.now();
@@ -338,6 +347,8 @@ function buildGround() {
   }
 }
 
+
+//world generation created with the help of ChatGPT
 const sizeX = 100;
 const sizeZ = 100;
 const sizeY = 20;
@@ -441,6 +452,135 @@ let castle = [
     ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
     [4, 4, 4, 4, 0, 0, 4, 4, 4, 4],
   ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    [4, 4, 4, 4, 0, 0, 4, 4, 4, 4],
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    [4, 4, 4, 4, 0, 0, 4, 4, 4, 4],
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 5, 5, 5, 5, 5, 5, 5, 5, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+  [
+    Array(10).fill().map(()=>4),
+    ...Array(8).fill().map(() => [4, 0, 0, 0, 0, 0, 0, 0, 0, 4]),
+    Array(10).fill().map(()=>4),
+  ],
+
+  [
+    [4, 4, 0, 0, 0, 0, 0, 0, 4, 4],
+    [4, 1, 1, 1, 1, 1, 1, 1, 1, 4],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [4, 1, 1, 1, 1, 1, 1, 1, 1, 4],
+    [4, 4, 0, 0, 0, 0, 0, 0, 4, 4],
+  ],
+  [
+    [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+    ...Array(2).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...Array(2).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+  ],
+  [
+    [],
+    ...Array(2).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...Array(2).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [],
+  ],
+  [
+    [],
+    ...Array(8).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [],
+  ],
+  [
+    [],
+    ...Array(8).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [],
+  ],
+  [
+    [],
+    ...Array(8).fill().map(() => [0, 1, 1, 1, 1, 1, 1, 1, 1, 0]),
+    [],
+  ],
+  
 ];
 
 function buildMap(map) {
@@ -490,6 +630,24 @@ function tick() {
   }
   if (keysPressed["KeyT"]) {
     camera.panDown(deltaTime);
+  }
+  if (keysPressed["Digit1"]){
+    chosenBlock = BLOCK_TYPES.LUCKY;
+  }
+  if (keysPressed["Digit2"]){
+    chosenBlock = BLOCK_TYPES.GRASS;
+  }
+  if (keysPressed["Digit3"]){
+    chosenBlock = BLOCK_TYPES.DIRT;
+  }
+  if (keysPressed["Digit4"]){
+    chosenBlock = BLOCK_TYPES.STONE;
+  }
+  if (keysPressed["Digit5"]){
+    chosenBlock = BLOCK_TYPES.OAK_PLANK;
+  }
+  if (keysPressed["Digit6"]){
+    chosenBlock = BLOCK_TYPES.PUMPKIN;
   }
   //renderAllChunks();
   renderNecessaryChunks();
