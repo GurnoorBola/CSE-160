@@ -321,11 +321,12 @@ function projectToSphere(x, y, radius = 1.0) {
 }
 
 function rotateModel(angle, axis) {
+  let length = Math.sqrt(axis[0]**2 + axis[1]**2 + axis[2]**2);
+  if (length < 1e-6 || isNaN(angle)) return;
+
   let rotationMatrix = new Matrix4();
   rotationMatrix.setRotate((angle * 180) / Math.PI, axis[0], axis[1], axis[2]);
-  g_trackballRotationMatrix = rotationMatrix.multiply(
-    g_trackballRotationMatrix,
-  );
+  g_trackballRotationMatrix = rotationMatrix.multiply(g_trackballRotationMatrix);
 }
 
 var g_startTime = performance.now() / 1000.0;
