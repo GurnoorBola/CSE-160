@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Virtual World</title>
+  </head>
+
+  <body onload="main()">
+    <style>
+      /* canvas {
+        cursor: none;
+      } */
+    </style>
+
+    <canvas id="webgl" width='800' height='450' tabindex="0">
+      Please use a browser that supports 'canvas'
+    </canvas>
+
+    <p id="numdot">XXX</p>
+
+    <p>
+       <label style="display: inline-block; width: 50px">Render Distance</label>
+      <input
+        type="range"
+        min="1"
+        max="3"
+        value="2"
+        class="slider"
+        id="render"
+      />
+      <br><br>
+      <button type="button" id="normalon">Normals On</button>
+      <button type="button" id="normaloff">Normals Off</button>
+    </p>
+
+    <p style="max-width: 600px; line-height: 1.5;">
+      <strong>Controls:</strong><br>
+      Use WASD to move around the world. Use your mouse or Q & E to turn. Use left click to place block and right click to remove.<br>
+      Click num keys 1–6 to change which block you place.
+    </p>
+
+    <p style="max-width: 600px; line-height: 1.5;">
+      <strong>Blocks:</strong><br>
+      <ul>
+        <li>1: Lucky Block</li>
+        <li>2: Grass Block</li>
+        <li>3: Dirt Block</li>
+        <li>4: Stone Block</li>
+        <li>5: Wooden Plank</li>
+        <li>6: Pumpkin</li>
+      </ul>
+    </p>
+
+
+    <br />
+    <p>Gurnoor Bola <br />gsbola@ucsc.edu</p>
+    <p style="max-width: 600px; line-height: 1.5;"><strong>Notes to Grader: </strong></p>
+    <p style="max-width: 600px; line-height: 1.5;">
+    </p>
+    
+
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix-cse160.js"></script>
+    <script src="src/Sky.js"></script>
+    <script src="src/Chunk.js"></script>
+    <script src="src/Cube.js"></script>
+    <script src="src/Camera.js"></script>
+    <script src="src/asg4.js"></script>
+  </body>
+</html>
