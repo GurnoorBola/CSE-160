@@ -27,6 +27,33 @@
         value="2"
         class="slider"
         id="render"
+      /><br>
+      <label style="display: inline-block; width: 60px">Light X</label>
+      <input
+        type="range"
+        min="0"
+        max="50"
+        value="16"
+        class="slider"
+        id="lightx"
+      />
+      <label style="display: inline-block; width: 60px">Light Y</label>
+      <input
+        type="range"
+        min="0"
+        max="50"
+        value="6"
+        class="slider"
+        id="lighty"
+      />
+      <label style="display: inline-block; width: 60px">Light Z</label>
+      <input
+        type="range"
+        min="0"
+        max="50"
+        value="22"
+        class="slider"
+        id="lightz"
       />
       <br><br>
       <button type="button" id="normalon">Normals On</button>
@@ -63,10 +90,10 @@
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/cuon-utils.js"></script>
     <script src="lib/cuon-matrix-cse160.js"></script>
-    <script src="src/Sky.js"></script>
+    <script src="src/Cube.js"></script>
     <script src="src/Sphere.js"></script>
     <script src="src/Chunk.js"></script>
-    <script src="src/Cube.js"></script>
+    <script src="src/Block.js"></script>
     <script src="src/Camera.js"></script>
     <script src="src/asg4.js"></script>
   </body>

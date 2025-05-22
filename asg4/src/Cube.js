@@ -1,10 +1,16 @@
 class Cube {
-  constructor(chunk, uv, color = [1, 1, 1, 1], textureWeight = 1.0) {
+  constructor(color = [0, 0, 1, 1], uv = Array(6).fill().map(() => [0, 0, 1, 0, 1, 1, 0, 1]), textureWeight = 0.0) {
     this.type = "cube";
-    this.chunk = chunk;
 
     this.baseColor = color;
 
+    var vertexBuffer = gl.createBuffer();
+    if (!vertexBuffer) {
+      console.log("Failed to create the buffer object");
+      return -1;
+    }
+    this.vertexBuffer = vertexBuffer;
+    this.vertexData = [];
     this.vertices = new Float32Array([
       //UV structure: array containing arrays of uv coords of the four corners of the square texture.
       //order is front, back, top, bot, right, left
@@ -41,7 +47,7 @@ class Cube {
     ]);
 
     this.uvs = new Float32Array([
-      //front face (z = -0.5)
+      //front face (z = +0.5)
       uv[1][0],
       uv[1][1],
       uv[1][2],
@@ -56,7 +62,7 @@ class Cube {
       uv[1][6],
       uv[1][7],
 
-      // Back face (z = +0.5)
+      // Back face (z = -0.5)
       uv[0][0],
       uv[0][1],
       uv[0][2],
@@ -156,10 +162,73 @@ class Cube {
     this.matrix = new Matrix4();
   }
 
+  reset() {
+    this.matrix.setIdentity();
+  }
+
+  render(){
+    //structure of vertexData [x, y, z,   u, v,   r, g, b, a,   textureweight]
+    //remember to build once before rendering
+
+    const stride = 13;
+
+    var FSIZE = Float32Array.BYTES_PER_ELEMENT;
+
+    //Bind the buffer object to target
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+
+    // Assign the buffer object to a_Postion variable
+    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * stride, 0);
+
+    // Enable the assignmnet to a_Position variable
+    gl.enableVertexAttribArray(a_Position);
+
+    // Assign the buffer object to a_UV variable
+    gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, FSIZE * stride, FSIZE * 3);
+
+    // Enable the assignmnet to a_UV variable
+    gl.enableVertexAttribArray(a_UV);
+
+    // Assign the buffer object to a_Color variable
+    gl.vertexAttribPointer(
+      a_Color,
+      4,
+      gl.FLOAT,
+      false,
+      FSIZE * stride,
+      FSIZE * 5,
+    );
+
+    // Enable the assignmnet to a_Color variable
+    gl.enableVertexAttribArray(a_Color);
+
+    // Assign the buffer object to a_texColorWeight variable
+    gl.vertexAttribPointer(
+      a_texColorWeight,
+      1,
+      gl.FLOAT,
+      false,
+      FSIZE * stride,
+      FSIZE * 9,
+    );
+
+    // Assign the buffer object to a_Normal variable
+    gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, FSIZE * stride, FSIZE * 10);
+
+    // Enable the assignmnet to a_Normal variable
+    gl.enableVertexAttribArray(a_Normal);
+
+    // Enable the assignmnet to a_texColorWeight variable
+    gl.enableVertexAttribArray(a_texColorWeight);
+
+    gl.drawArrays(gl.TRIANGLES, 0, this.vertexData.length / stride);
+  }
+
   //applies matrix transformation and returns new cube data
   compute() {
-    //structure of chunkData [x, y, z,   u, v,   r, g, b, a,   textureweight]
-    let chunkVertexData = this.chunk.vertexData;
+    //structure of chunkData [x, y, z,   u, v,   r, g, b, a,   textureweight,   nx, ny, nz]
+    this.vertexData = [];
+    let vertexData = this.vertexData;
     let vertex = new Vector3();
     for (let i = 0; i < this.vertices.length; i += 3) {
       vertex.elements = [
@@ -171,7 +240,7 @@ class Cube {
       let u = this.uvs[uvIndex];
       let v = this.uvs[uvIndex + 1];
 
-      chunkVertexData.push(
+      vertexData.push(
         ...this.matrix.multiplyVector3(vertex).elements,
         u,
         v,
@@ -183,5 +252,7 @@ class Cube {
         this.normals[i + 2],
       );
     }
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexData), gl.DYNAMIC_DRAW);
   }
 }

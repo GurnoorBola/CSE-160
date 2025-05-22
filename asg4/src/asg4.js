@@ -176,6 +176,7 @@ function sendTextureToGLSL(image) {
 //gloabls
 let focused = false;
 let chosenBlock = BLOCK_TYPES.STONE;
+let lightPos = [16, 6, 22];
 
 
 const keysPressed = {};
@@ -192,6 +193,24 @@ function addActionsForHTML() {
   renderSlider.value = 2;
   renderSlider.addEventListener("input", function () {
     renderDistance = chunkSize * renderSlider.value;
+  });
+
+  let lightSlideX = document.getElementById('lightx');
+  lightSlideX.value = lightPos[0];
+  lightSlideX.addEventListener('input', ()=>{
+    lightPos[0] = this.value;
+  });
+
+  let lightSlideY = document.getElementById('lighty');
+  lightSlideY.value = lightPos[1];
+  lightSlideX.addEventListener('input', ()=>{
+    lightPos[1] = this.value;
+  });
+
+  let lightSlideZ = document.getElementById('lightz');
+  lightSlideZ.value = lightPos[2];
+  lightSlideZ.addEventListener('input', ()=>{
+    lightPos[2] = this.value;
   });
 
   function onMouseMove(e) {
@@ -711,7 +730,7 @@ function main() {
   buildAllChunks();
 
 
-  sky = new Sky([101/255,153/255,253/255, 1.0]);
+  sky = new Cube([101/255,153/255,253/255, 1.0]);
 
   sphere = new Sphere();
   sphere.matrix.translate(16, 4, 22);

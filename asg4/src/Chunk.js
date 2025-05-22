@@ -313,7 +313,7 @@ class Chunk {
       //get block type from blocks array and make block of that type
       let blockType = this.blocks[i];
       if (blockType != BLOCK_TYPES.AIR) {
-        let cube = new Cube(
+        let cube = new Block(
           this,
           BLOCK_DATA[blockType].uv,
           BLOCK_DATA[blockType].color,
