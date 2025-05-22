@@ -14,8 +14,8 @@ constructor(color = [1, 1, 1, 1]) {
     this.vertices = [];
     this.normals = this.vertices;
 
-    let d=Math.PI/10;
-    let dd=Math.PI/10;
+    let d=Math.PI/100;
+    let dd=Math.PI/100;
 
     for (let t=0; t < Math.PI; t+=d) {
         for (let r=0; r<(2*Math.PI); r+=d) {
