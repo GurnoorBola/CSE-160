@@ -1,5 +1,5 @@
 const chunkSize = 16;
-const worldSize = chunkSize * 4;
+const worldSize = chunkSize * 16;
 const cubeSize = 0.5;
 
 
