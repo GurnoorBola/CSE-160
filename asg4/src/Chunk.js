@@ -301,7 +301,7 @@ class Chunk {
     // Assign the buffer object to a_Normal variable
     gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, FSIZE * stride, FSIZE * 10);
 
-    // Enable the assignmnet to a_texColorWeight variable
+    // Enable the assignmnet to a_Normal variable
     gl.enableVertexAttribArray(a_Normal);
 
     gl.drawArrays(gl.TRIANGLES, 0, this.vertexData.length / stride);
