@@ -9,6 +9,7 @@ var VSHADER_SOURCE = `
   varying vec4 v_Color;
   varying float v_texColorWeight;
   varying vec3 v_Normal;
+  varying vec4 v_VertPos;
   uniform mat4 u_ViewMatrix;
   uniform mat4 u_ProjectionMatrix;
   void main() {
@@ -17,6 +18,7 @@ var VSHADER_SOURCE = `
     v_Color = a_Color;
     v_texColorWeight = a_texColorWeight;
     v_Normal = a_Normal;
+    v_VertPos = a_Position;
   }`;
 
 // Fragment shader program
@@ -24,16 +26,26 @@ var FSHADER_SOURCE = `
   precision mediump float;
   uniform sampler2D u_Sampler0;
   uniform bool u_ShowNormals;
+  uniform vec3 u_lightPos;
   varying vec2 v_UV;
   varying vec4 v_Color;
   varying float v_texColorWeight;
   varying vec3 v_Normal;
+  varying vec4 v_VertPos;
   void main() {
     if (u_ShowNormals){
       gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);
     } else {
       float t = v_texColorWeight;
       gl_FragColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
+    }
+    
+    vec3 lightVector = vec3(v_VertPos)-u_lightPos;
+    float r = length(lightVector);
+    if (r < 1.0){
+      gl_FragColor = vec4(1, 0, 0, 1);
+    } else if (r < 2.0) {
+      gl_FragColor = vec4(0, 1, 0, 1);
     }
   }`;
 
@@ -54,6 +66,7 @@ let u_ViewMatrix;
 let u_ProjectionMatrix;
 let u_ModelMatrix;
 let u_ShowNormals;
+let u_lightPos;
 
 let camera = new Camera();
 
@@ -138,6 +151,12 @@ function connectVariablesToGLSL() {
     console.log("Failed to get the storage location of u_ShowNormals");
     return false;
   }
+
+  u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
+  if (!u_lightPos) {
+    console.log("Failed to get the storage location of u_lightPos");
+    return false;
+  }
 }
 
 function initTextures() {
@@ -198,19 +217,31 @@ function addActionsForHTML() {
   let lightSlideX = document.getElementById('lightx');
   lightSlideX.value = lightPos[0];
   lightSlideX.addEventListener('input', ()=>{
-    lightPos[0] = this.value;
+    lightPos[0] = lightSlideX.value;
+    pointLight.reset();
+    pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
+    pointLight.matrix.scale(0.25, 0.25, 0.25);
+    pointLight.compute();
   });
 
   let lightSlideY = document.getElementById('lighty');
   lightSlideY.value = lightPos[1];
-  lightSlideX.addEventListener('input', ()=>{
-    lightPos[1] = this.value;
+  lightSlideY.addEventListener('input', ()=>{
+    lightPos[1] = lightSlideY.value;
+    pointLight.reset();
+    pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
+    pointLight.matrix.scale(0.25, 0.25, 0.25);
+    pointLight.compute();
   });
 
   let lightSlideZ = document.getElementById('lightz');
   lightSlideZ.value = lightPos[2];
   lightSlideZ.addEventListener('input', ()=>{
-    lightPos[2] = this.value;
+    lightPos[2] = lightSlideZ.value;
+    pointLight.reset();
+    pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
+    pointLight.matrix.scale(0.25, 0.25, 0.25);
+    pointLight.compute();
   });
 
   function onMouseMove(e) {
@@ -328,6 +359,7 @@ function renderAllChunks() {
 
 //will only render chunks within a certain render distance from camera
 let sky;
+let pointLight;
 let sphere;
 let renderDistance = chunkSize*2;
 function renderNecessaryChunks() {
@@ -338,6 +370,8 @@ function renderNecessaryChunks() {
 
   gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
 
+  gl.uniform3f(u_lightPos, lightPos[0], lightPos[1], lightPos[2]);
+
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -347,6 +381,7 @@ function renderNecessaryChunks() {
   sky.compute();
   gl.disable(gl.CULL_FACE);
   sky.render();
+  pointLight.render();
   sphere.render();
   gl.enable(gl.CULL_FACE);
 
@@ -735,6 +770,11 @@ function main() {
   sphere = new Sphere();
   sphere.matrix.translate(16, 4, 22);
   sphere.compute();
+
+  pointLight = new Cube([1, 0, 0, 1])
+  pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
+  pointLight.matrix.scale(0.25, 0.25, 0.25);
+  pointLight.compute();
 
   // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
   // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
