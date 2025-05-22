@@ -309,6 +309,7 @@ function renderAllChunks() {
 
 //will only render chunks within a certain render distance from camera
 let sky;
+let sphere;
 let renderDistance = chunkSize*2;
 function renderNecessaryChunks() {
   //check the time at the start of this function
@@ -323,10 +324,11 @@ function renderNecessaryChunks() {
 
   sky.reset();
   sky.matrix.translate(camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
-  sky.matrix.scale(-renderDistance*2, -renderDistance*2, -renderDistance*2);
+  sky.matrix.scale(-renderDistance*3, -renderDistance*3, -renderDistance*3);
   sky.compute();
   gl.disable(gl.CULL_FACE);
   sky.render();
+  sphere.render();
   gl.enable(gl.CULL_FACE);
 
   // var len = g_points.length;
@@ -710,6 +712,10 @@ function main() {
 
 
   sky = new Sky([101/255,153/255,253/255, 1.0]);
+
+  sphere = new Sphere();
+  sphere.matrix.translate(16, 4, 22);
+  sphere.compute();
 
   // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
   // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)

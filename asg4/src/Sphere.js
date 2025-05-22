@@ -12,19 +12,25 @@ constructor(color = [1, 1, 1, 1]) {
     this.vertexBuffer = vertexBuffer;
     this.vertexData = [];
     this.vertices = [];
+    this.normals = this.vertices;
 
     let d=Math.PI/10;
     let dd=Math.PI/10;
 
     for (let t=0; t < Math.PI; t+=d) {
         for (let r=0; r<(2*Math.PI); r+=d) {
-            var p1 = [Math.sin(t)*Math.cos(r), ]
+            var p1 = [Math.sin(t)*Math.cos(r), Math.sin(t)*Math.sin(r), Math.cos(t)];
+            var p2 = [Math.sin(t+dd)*Math.cos(r), Math.sin(t+dd)*Math.sin(r), Math.cos(t+dd)];
+            var p3 = [Math.sin(t)*Math.cos(r+dd), Math.sin(t)*Math.sin(r+dd), Math.cos(t)];
+            var p4 = [Math.sin(t+dd)*Math.cos(r+dd), Math.sin(t+dd)*Math.sin(r+dd), Math.cos(t+dd)];
+
+            this.vertices.push(
+              ...p1, ...p2, ...p4,
+              ...p1, ...p4, ...p3
+            );
         }
     }
-
-    this.normals = this.vertices;
-
-    this.texColorWeight = textureWeight;
+    
     this.matrix = new Matrix4();
   }
 
@@ -92,6 +98,7 @@ constructor(color = [1, 1, 1, 1]) {
 
   //applies matrix transformation and returns new cube data
   compute() {
+    console.log(this.normals)
     //structure of chunkData [x, y, z,   u, v,   r, g, b, a,   textureweight,   nx, ny, nz]
     this.vertexData = [];
     let vertexData = this.vertexData;
@@ -102,20 +109,18 @@ constructor(color = [1, 1, 1, 1]) {
         this.vertices[i + 1],
         this.vertices[i + 2],
       ];
-      let uvIndex = (i / 3) * 2;
-      let u = this.uvs[uvIndex];
-      let v = this.uvs[uvIndex + 1];
 
       vertexData.push(
         ...this.matrix.multiplyVector3(vertex).elements,
-        u,
-        v,
+        //UV coords
+        0,
+        0,
         ...this.baseColor,
-        this.texColorWeight,
-
+        //texColorWeight
+        0,
         this.normals[i],
         this.normals[i + 1],
-        this.normals[i + 2],
+        -this.normals[i + 2],
       );
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);

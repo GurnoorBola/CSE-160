@@ -3,7 +3,7 @@ class Camera {
   constructor() {
     this.fov = 60;
     this.eye = new Vector3([8, 4, 18]);
-    this.at = new Vector3([0, 4, 0]);
+    this.at = new Vector3([16, 4, 22]);
     this.up = new Vector3([0, 1, 0]);
     this.viewMatrix = new Matrix4().setLookAt(
       ...this.eye.elements,
