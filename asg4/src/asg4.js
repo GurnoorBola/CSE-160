@@ -28,7 +28,9 @@ var FSHADER_SOURCE = `
   uniform bool u_ShowNormals;
   uniform bool u_Lit;
   uniform bool u_Sky;
+  uniform bool u_specularOn;
   uniform vec3 u_lightPos;
+  uniform vec3 u_cameraPos;
   varying vec2 v_UV;
   varying vec4 v_Color;
   varying float v_texColorWeight;
@@ -43,7 +45,7 @@ var FSHADER_SOURCE = `
       baseColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
     }
     
-    vec3 ambient = vec3(baseColor) * 0.1;
+    vec3 ambient = vec3(baseColor) * 0.2;
     if (u_Sky) {
       gl_FragColor = vec4(ambient, 1.0);
       return;  
@@ -58,8 +60,26 @@ var FSHADER_SOURCE = `
     vec3 L = normalize(lightVector);
     vec3 N = normalize(v_Normal);
     float nDotL = max(dot(N, L), 0.0);
-    vec3 diffuse = vec3(baseColor) * nDotL;
-    gl_FragColor = vec4(diffuse+ambient, 1.0);
+
+    vec3 lightColor = vec3(1.0, 0, 0);
+    float constant = 1.0;
+    float linear = 0.1;
+    float quadratic = 0.05;
+
+    float attenuation = 1.0 / (constant + linear * r + quadratic * r * r);
+
+    vec3 R = reflect(-L, N);
+    vec3 E = normalize(u_cameraPos - vec3(v_VertPos));
+
+    float specularStrength = 1.0;
+    float shininess = 32.0;
+    vec3 specular;
+    if (!u_specularOn) {
+      specularStrength = 0.0;
+    }
+    specular = lightColor * specularStrength * pow(max(dot(E, R), 0.0), shininess);
+    vec3 diffuse = vec3(baseColor) * lightColor * nDotL * attenuation;
+    gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
   }`;
 
 // Global Variables
@@ -81,7 +101,9 @@ let u_ModelMatrix;
 let u_ShowNormals;
 let u_Lit;
 let u_Sky;
+let u_specularOn;
 let u_lightPos;
+let u_cameraPos;
 
 let camera = new Camera();
 
@@ -179,9 +201,21 @@ function connectVariablesToGLSL() {
     return false;
   }
 
+  u_specularOn = gl.getUniformLocation(gl.program, "u_specularOn");
+  if (!u_specularOn) {
+    console.log("Failed to get the storage location of u_specularOn");
+    return false;
+  }
+
   u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
   if (!u_lightPos) {
     console.log("Failed to get the storage location of u_lightPos");
+    return false;
+  }
+
+  u_cameraPos = gl.getUniformLocation(gl.program, "u_cameraPos");
+  if (!u_cameraPos) {
+    console.log("Failed to get the storage location of u_cameraPos");
     return false;
   }
 }
@@ -430,12 +464,14 @@ function renderNecessaryChunks() {
   gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
 
   gl.uniform3f(u_lightPos, lightPos[0], lightPos[1], lightPos[2]);
+  gl.uniform3f(u_cameraPos, camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
   gl.uniform1i(u_Lit, false);
   gl.uniform1i(u_Sky, true);
+  gl.uniform1i(u_specularOn, false);
 
   sky.reset();
   sky.matrix.translate(camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
@@ -448,8 +484,11 @@ function renderNecessaryChunks() {
   pointLight.render();
 
   gl.uniform1i(u_Lit, true);
+  gl.uniform1i(u_specularOn, true);
 
   sphere.render();
+
+  gl.uniform1i(u_specularOn, false);
   // var len = g_points.length;
   var len = g_chunksList.length;
   for (var i = 0; i < len; i++) {
