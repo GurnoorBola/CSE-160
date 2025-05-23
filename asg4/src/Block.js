@@ -7,14 +7,14 @@ class Block {
 
     this.vertices = new Float32Array([
       //UV structure: array containing arrays of uv coords of the four corners of the square texture.
-      //order is front, back, top, bot, right, left
+      //order is back, front, top, bot, right, left
 
-      // Front face (z = +0.5)
+      // Front face (z = -0.5)
       -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,
 
       -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
 
-      // Back face (z = -0.5)
+      // Back face (z = +0.5)
       0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5,
 
       0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5,
@@ -133,11 +133,11 @@ class Block {
     ]);
 
     this.normals = new Float32Array([
-      0, 0, -1,  0, 0, -1,  0, 0, -1,
-      0, 0, -1,  0, 0, -1,  0, 0, -1,
+      0, 0, 1,  0, 0, 1,  0, 0, 1,
+      0, 0, 1,  0, 0, 1,  0, 0, 1,
 
-      0, 0, 1,  0, 0, 1,  0, 0, 1,
-      0, 0, 1,  0, 0, 1,  0, 0, 1,
+      0, 0, -1,  0, 0, -1,  0, 0, -1,
+      0, 0, -1,  0, 0, -1,  0, 0, -1,
 
       0, 1, 0,  0, 1, 0,  0, 1, 0,
       0, 1, 0,  0, 1, 0,  0, 1, 0,

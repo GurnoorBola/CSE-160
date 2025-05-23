@@ -98,7 +98,6 @@ constructor(color = [1, 1, 1, 1]) {
 
   //applies matrix transformation and returns new cube data
   compute() {
-    console.log(this.normals)
     //structure of chunkData [x, y, z,   u, v,   r, g, b, a,   textureweight,   nx, ny, nz]
     this.vertexData = [];
     let vertexData = this.vertexData;
@@ -120,7 +119,7 @@ constructor(color = [1, 1, 1, 1]) {
         0,
         this.normals[i],
         this.normals[i + 1],
-        -this.normals[i + 2],
+        this.normals[i + 2],
       );
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);

@@ -26,6 +26,8 @@ var FSHADER_SOURCE = `
   precision mediump float;
   uniform sampler2D u_Sampler0;
   uniform bool u_ShowNormals;
+  uniform bool u_Lit;
+  uniform bool u_Sky;
   uniform vec3 u_lightPos;
   varying vec2 v_UV;
   varying vec4 v_Color;
@@ -33,20 +35,31 @@ var FSHADER_SOURCE = `
   varying vec3 v_Normal;
   varying vec4 v_VertPos;
   void main() {
+    vec4 baseColor;
     if (u_ShowNormals){
-      gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);
+      baseColor = vec4((v_Normal+1.0)/2.0, 1.0);
     } else {
       float t = v_texColorWeight;
-      gl_FragColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
+      baseColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
     }
     
-    vec3 lightVector = vec3(v_VertPos)-u_lightPos;
-    float r = length(lightVector);
-    if (r < 1.0){
-      gl_FragColor = vec4(1, 0, 0, 1);
-    } else if (r < 2.0) {
-      gl_FragColor = vec4(0, 1, 0, 1);
+    vec3 ambient = vec3(baseColor) * 0.1;
+    if (u_Sky) {
+      gl_FragColor = vec4(ambient, 1.0);
+      return;  
     }
+    if (!u_Lit) {
+      gl_FragColor = baseColor;
+      return;  
+    }
+
+    vec3 lightVector = u_lightPos - vec3(v_VertPos);
+    float r = length(lightVector);
+    vec3 L = normalize(lightVector);
+    vec3 N = normalize(v_Normal);
+    float nDotL = max(dot(N, L), 0.0);
+    vec3 diffuse = vec3(baseColor) * nDotL;
+    gl_FragColor = vec4(diffuse+ambient, 1.0);
   }`;
 
 // Global Variables
@@ -66,6 +79,8 @@ let u_ViewMatrix;
 let u_ProjectionMatrix;
 let u_ModelMatrix;
 let u_ShowNormals;
+let u_Lit;
+let u_Sky;
 let u_lightPos;
 
 let camera = new Camera();
@@ -149,6 +164,18 @@ function connectVariablesToGLSL() {
   u_ShowNormals = gl.getUniformLocation(gl.program, "u_ShowNormals");
   if (!u_ShowNormals) {
     console.log("Failed to get the storage location of u_ShowNormals");
+    return false;
+  }
+
+  u_Lit = gl.getUniformLocation(gl.program, "u_Lit");
+  if (!u_Lit) {
+    console.log("Failed to get the storage location of u_Lit");
+    return false;
+  }
+
+  u_Sky = gl.getUniformLocation(gl.program, "u_Sky");
+  if (!u_Sky) {
+    console.log("Failed to get the storage location of u_Sky");
     return false;
   }
 
@@ -406,18 +433,23 @@ function renderNecessaryChunks() {
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  
+  gl.uniform1i(u_Lit, false);
+  gl.uniform1i(u_Sky, true);
 
   sky.reset();
   sky.matrix.translate(camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
   sky.matrix.scale(-renderDistance*3, -renderDistance*3, -renderDistance*3);
   sky.compute();
-  gl.disable(gl.CULL_FACE);
   sky.render();
 
+  gl.uniform1i(u_Lit, false);
+  gl.uniform1i(u_Sky, false);
   pointLight.render();
-  sphere.render();
-  gl.enable(gl.CULL_FACE);
 
+  gl.uniform1i(u_Lit, true);
+
+  sphere.render();
   // var len = g_points.length;
   var len = g_chunksList.length;
   for (var i = 0; i < len; i++) {
