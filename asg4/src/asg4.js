@@ -195,10 +195,22 @@ function sendTextureToGLSL(image) {
 //gloabls
 let focused = false;
 let chosenBlock = BLOCK_TYPES.STONE;
-let lightPos = [16, 6, 22];
+let sky;
+let pointLight;
+let sphere;
+let sphereLoc  = [16, 4, 22];
+let lightPos = sphereLoc.slice();
+let xOffset = 0;
+let yOffset = 2;
+let zOffset = 1;
+lightPos[0] += xOffset; lightPos[1] += yOffset; lightPos[2] += zOffset;
+let animationToggle = false;
+let animationStartTime;
 
+let lightSlideX;
+let lightSlideZ;
 
-const keysPressed = {};
+keysPressed = {};
 //set up actions for the HTML UI elements
 function addActionsForHTML() {
   canvas = document.getElementById("webgl");
@@ -214,10 +226,11 @@ function addActionsForHTML() {
     renderDistance = chunkSize * renderSlider.value;
   });
 
-  let lightSlideX = document.getElementById('lightx');
-  lightSlideX.value = lightPos[0];
+  lightSlideX = document.getElementById('lightx');
+  lightSlideX.value = lightPos[0]*10;
   lightSlideX.addEventListener('input', ()=>{
-    lightPos[0] = lightSlideX.value;
+    lightPos[0] = lightSlideX.value/10;
+    xOffset = lightPos[0] - sphereLoc[0];
     pointLight.reset();
     pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
     pointLight.matrix.scale(0.25, 0.25, 0.25);
@@ -225,19 +238,21 @@ function addActionsForHTML() {
   });
 
   let lightSlideY = document.getElementById('lighty');
-  lightSlideY.value = lightPos[1];
+  lightSlideY.value = lightPos[1]*10;
   lightSlideY.addEventListener('input', ()=>{
-    lightPos[1] = lightSlideY.value;
+    lightPos[1] = lightSlideY.value/10;
+    yOffset = lightPos[1] - sphereLoc[1];
     pointLight.reset();
     pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
     pointLight.matrix.scale(0.25, 0.25, 0.25);
     pointLight.compute();
   });
 
-  let lightSlideZ = document.getElementById('lightz');
-  lightSlideZ.value = lightPos[2];
+  lightSlideZ = document.getElementById('lightz');
+  lightSlideZ.value = lightPos[2]*10;
   lightSlideZ.addEventListener('input', ()=>{
-    lightPos[2] = lightSlideZ.value;
+    lightPos[2] = lightSlideZ.value/10;
+    zOffset = lightPos[2] - sphereLoc[2];
     pointLight.reset();
     pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
     pointLight.matrix.scale(0.25, 0.25, 0.25);
@@ -303,6 +318,8 @@ function addActionsForHTML() {
 
       canvas.addEventListener("mousedown", mouseClick);
     } else {
+      keysPressed = {};
+
       document.removeEventListener("mousemove", onMouseMove);
 
       document.removeEventListener("keydown", keyPressDown);
@@ -322,6 +339,25 @@ function addActionsForHTML() {
   normalOff.addEventListener('click', ()=>{
     gl.uniform1i(u_ShowNormals, false);
   })
+
+  let animationOn = document.getElementById('animationon');
+  animationOn.addEventListener('click', () => {
+    if (animationToggle) {
+      return;
+    }
+    lightSlideX.disabled = true;
+    lightSlideZ.disabled = true;
+    animationToggle = true;
+    animationStartTime = performance.now() /1000;
+    console.log(true)
+  });
+
+  let animationOff = document.getElementById('animationoff');
+  animationOff.addEventListener('click', () => {
+    lightSlideX.disabled = false;
+    lightSlideZ.disabled = false;
+    animationToggle = false;
+  });
 }
 
 var g_chunksList = [];
@@ -356,11 +392,7 @@ function renderAllChunks() {
   );
 }
 
-
 //will only render chunks within a certain render distance from camera
-let sky;
-let pointLight;
-let sphere;
 let renderDistance = chunkSize*2;
 function renderNecessaryChunks() {
   //check the time at the start of this function
@@ -381,6 +413,7 @@ function renderNecessaryChunks() {
   sky.compute();
   gl.disable(gl.CULL_FACE);
   sky.render();
+
   pointLight.render();
   sphere.render();
   gl.enable(gl.CULL_FACE);
@@ -738,6 +771,26 @@ function tick() {
   if (keysPressed["Digit6"]){
     chosenBlock = BLOCK_TYPES.PUMPKIN;
   }
+
+  if (animationToggle) {
+    let time = performance.now()/1000 - animationStartTime;
+    let r = Math.sqrt(xOffset**2 + zOffset**2)
+    let x = r * Math.cos(2*time);
+    let z = r * Math.sin(2*time);
+
+    lightPos[0] = sphereLoc[0] + x;
+    lightPos[2] = sphereLoc[2] + z;
+
+    lightSlideX.value = lightPos[0]*10;
+    lightSlideZ.value = lightPos[2]*10;
+
+
+    pointLight.reset();
+    pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
+    pointLight.matrix.scale(0.25, 0.25, 0.25);
+    pointLight.compute();
+  }
+
   //renderAllChunks();
   renderNecessaryChunks();
   requestAnimationFrame(tick);
@@ -768,7 +821,7 @@ function main() {
   sky = new Cube([101/255,153/255,253/255, 1.0]);
 
   sphere = new Sphere();
-  sphere.matrix.translate(16, 4, 22);
+  sphere.matrix.translate(sphereLoc[0], sphereLoc[1], sphereLoc[2]);
   sphere.compute();
 
   pointLight = new Cube([1, 0, 0, 1])
