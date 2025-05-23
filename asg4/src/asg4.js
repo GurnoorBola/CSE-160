@@ -29,6 +29,8 @@ var FSHADER_SOURCE = `
   uniform bool u_Lit;
   uniform bool u_Sky;
   uniform bool u_specularOn;
+  uniform bool u_lightToggle;
+  uniform vec3 u_lightColor;
   uniform vec3 u_lightPos;
   uniform vec3 u_cameraPos;
   varying vec2 v_UV;
@@ -45,41 +47,44 @@ var FSHADER_SOURCE = `
       baseColor = (1.0-t) * v_Color + t * texture2D(u_Sampler0, v_UV);
     }
     
-    vec3 ambient = vec3(baseColor) * 0.2;
-    if (u_Sky) {
-      gl_FragColor = vec4(ambient, 1.0);
-      return;  
-    }
-    if (!u_Lit) {
+    if (u_lightToggle) {
+      vec3 ambient = vec3(baseColor) * 0.2;
+      if (u_Sky) {
+        gl_FragColor = vec4(ambient, 1.0);
+        return;  
+      }
+      if (!u_Lit) {
+        gl_FragColor = baseColor;
+        return;  
+      }
+
+      vec3 lightVector = u_lightPos - vec3(v_VertPos);
+      float r = length(lightVector);
+      vec3 L = normalize(lightVector);
+      vec3 N = normalize(v_Normal);
+      float nDotL = max(dot(N, L), 0.0);
+
+      float constant = 1.0;
+      float linear = 0.1;
+      float quadratic = 0.05;
+
+      float attenuation = 1.0 / (constant + linear * r + quadratic * r * r);
+
+      vec3 R = reflect(-L, N);
+      vec3 E = normalize(u_cameraPos - vec3(v_VertPos));
+
+      float specularStrength = 1.0;
+      float shininess = 32.0;
+      vec3 specular;
+      if (!u_specularOn) {
+        specularStrength = 0.0;
+      }
+      specular = u_lightColor * specularStrength * attenuation * pow(max(dot(E, R), 0.0), shininess);
+      vec3 diffuse = vec3(baseColor) * u_lightColor * nDotL * attenuation;
+      gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
+    } else  {
       gl_FragColor = baseColor;
-      return;  
     }
-
-    vec3 lightVector = u_lightPos - vec3(v_VertPos);
-    float r = length(lightVector);
-    vec3 L = normalize(lightVector);
-    vec3 N = normalize(v_Normal);
-    float nDotL = max(dot(N, L), 0.0);
-
-    vec3 lightColor = vec3(1.0, 0, 0);
-    float constant = 1.0;
-    float linear = 0.1;
-    float quadratic = 0.05;
-
-    float attenuation = 1.0 / (constant + linear * r + quadratic * r * r);
-
-    vec3 R = reflect(-L, N);
-    vec3 E = normalize(u_cameraPos - vec3(v_VertPos));
-
-    float specularStrength = 1.0;
-    float shininess = 32.0;
-    vec3 specular;
-    if (!u_specularOn) {
-      specularStrength = 0.0;
-    }
-    specular = lightColor * specularStrength * pow(max(dot(E, R), 0.0), shininess);
-    vec3 diffuse = vec3(baseColor) * lightColor * nDotL * attenuation;
-    gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
   }`;
 
 // Global Variables
@@ -102,7 +107,9 @@ let u_ShowNormals;
 let u_Lit;
 let u_Sky;
 let u_specularOn;
+let u_lightToggle;
 let u_lightPos;
+let u_lightColor;
 let u_cameraPos;
 
 let camera = new Camera();
@@ -207,6 +214,20 @@ function connectVariablesToGLSL() {
     return false;
   }
 
+  u_lightToggle = gl.getUniformLocation(gl.program, "u_lightToggle");
+  if (!u_lightToggle) {
+    console.log("Failed to get the storage location of u_lightToggle");
+    return false;
+  }
+  gl.uniform1i(u_lightToggle, true);
+
+  u_lightColor = gl.getUniformLocation(gl.program, "u_lightColor");
+  if (!u_lightColor) {
+    console.log("Failed to get the storage location of u_lightColor");
+    return false;
+  }
+  gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255);
+
   u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
   if (!u_lightPos) {
     console.log("Failed to get the storage location of u_lightPos");
@@ -261,6 +282,7 @@ let pointLight;
 let sphere;
 let sphereLoc  = [16, 4, 22];
 let lightPos = sphereLoc.slice();
+let pointColor = [255, 0, 0];
 let xOffset = 0;
 let yOffset = 2;
 let zOffset = 1;
@@ -319,6 +341,33 @@ function addActionsForHTML() {
     pointLight.matrix.scale(0.25, 0.25, 0.25);
     pointLight.compute();
   });
+
+  let pointR = document.getElementById('pointR');
+  pointR.value = pointColor[0];
+  pointR.addEventListener('input', ()=>{
+    pointColor[0] = pointR.value;
+    pointLight.baseColor[0] = pointColor[0]/255;
+    pointLight.compute();
+    gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255)
+  })
+
+  let pointG = document.getElementById('pointG');
+  pointG.value = pointColor[1];
+  pointG.addEventListener('input', ()=>{
+    pointColor[1] = pointG.value;
+    pointLight.baseColor[1] = pointColor[1]/255;
+    pointLight.compute();
+    gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255)
+  })
+
+  let pointB = document.getElementById('pointB');
+  pointB.value = pointColor[2];
+  pointB.addEventListener('input', ()=>{
+    pointColor[2] = pointB.value;
+    pointLight.baseColor[2] = pointColor[2]/255;
+    pointLight.compute();
+    gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255)
+  })
 
   function onMouseMove(e) {
     if (document.pointerLockElement !== canvas) return;
@@ -419,6 +468,17 @@ function addActionsForHTML() {
     lightSlideZ.disabled = false;
     animationToggle = false;
   });
+
+  let lightingOn = document.getElementById('lighton');
+  lightingOn.addEventListener('click', ()=>{
+    gl.uniform1i(u_lightToggle, true);
+  });
+
+  let lightingOff = document.getElementById('lightoff');
+  lightingOff.addEventListener('click', ()=>{
+    gl.uniform1i(u_lightToggle, false);
+  });
+
 }
 
 var g_chunksList = [];
