@@ -488,7 +488,7 @@ function addActionsForHTML() {
   let spotB = document.getElementById('spotB');
   spotB.value = spotColor[2];
   spotB.addEventListener('input', ()=>{
-    pointColor[2] = spotB.value;
+    spotColor[2] = spotB.value;
     spotLight.baseColor[2] = spotColor[2]/255;
     spotLight.compute();
     gl.uniform3f(u_spotColor, spotColor[0]/255, spotColor[1]/255, spotColor[2]/255)
