@@ -31,7 +31,12 @@ var FSHADER_SOURCE = `
   uniform bool u_specularOn;
   uniform bool u_lightToggle;
   uniform vec3 u_lightColor;
+  uniform vec3 u_spotColor;
   uniform vec3 u_lightPos;
+  uniform vec3 u_spotPos;
+  uniform vec3 u_spotDirection;
+  uniform float u_lightInnerCutoff;
+  uniform float u_lightOuterCutoff;
   uniform vec3 u_cameraPos;
   varying vec2 v_UV;
   varying vec4 v_Color;
@@ -81,7 +86,26 @@ var FSHADER_SOURCE = `
       }
       specular = u_lightColor * specularStrength * attenuation * pow(max(dot(E, R), 0.0), shininess);
       vec3 diffuse = vec3(baseColor) * u_lightColor * nDotL * attenuation;
-      gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
+
+      vec3 spotVector = u_spotPos - vec3(v_VertPos);
+      vec3 surfToSpot = normalize(spotVector);
+      vec3 spotToSurf = -surfToSpot;
+
+      float spot_diffuse = max(0.0, dot(surfToSpot, N));
+      float angleToSurface = dot(u_spotDirection, spotToSurf);
+      float spot = smoothstep(u_lightOuterCutoff, u_lightInnerCutoff, angleToSurface);
+
+      float k_constant = 1.0;
+      float k_linear = 0.09;
+      float k_quadratic = 0.032;
+      float spot_attenuation = 1.0 / (k_constant + k_linear * r + k_quadratic * r * r);
+      
+      float brightness = spot_diffuse * spot * spot_attenuation;
+
+      vec3 spotlight = u_spotColor * brightness;
+
+
+      gl_FragColor = vec4(specular + diffuse + spotlight + ambient, 1.0);
     } else  {
       gl_FragColor = baseColor;
     }
@@ -109,6 +133,11 @@ let u_Sky;
 let u_specularOn;
 let u_lightToggle;
 let u_lightPos;
+let u_spotPos;
+let u_spotColor;
+let u_spotDirection;
+let u_lightInnerCutoff;
+let u_lightOuterCutoff;
 let u_lightColor;
 let u_cameraPos;
 
@@ -228,9 +257,40 @@ function connectVariablesToGLSL() {
   }
   gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255);
 
+  u_spotColor = gl.getUniformLocation(gl.program, "u_spotColor");
+  if (!u_spotColor) {
+    console.log("Failed to get the storage location of u_spotColor");
+    return false;
+  }
+  gl.uniform3f(u_spotColor, spotColor[0]/255, spotColor[1]/255, spotColor[2]/255);
+
   u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
   if (!u_lightPos) {
     console.log("Failed to get the storage location of u_lightPos");
+    return false;
+  }
+
+  u_spotPos = gl.getUniformLocation(gl.program, "u_spotPos");
+  if (!u_spotPos) {
+    console.log("Failed to get the storage location of u_spotPos");
+    return false;
+  }
+  
+  u_spotDirection = gl.getUniformLocation(gl.program, "u_spotDirection");
+  if (!u_spotDirection) {
+    console.log("Failed to get the storage location of u_spotDirection");
+    return false;
+  }
+
+  u_lightInnerCutoff = gl.getUniformLocation(gl.program, "u_lightInnerCutoff");
+  if (!u_lightInnerCutoff) {
+    console.log("Failed to get the storage location of u_lightInnerCutoff");
+    return false;
+  }
+
+  u_lightOuterCutoff = gl.getUniformLocation(gl.program, "u_lightOuterCutoff");
+  if (!u_lightOuterCutoff) {
+    console.log("Failed to get the storage location of u_lightOuterCutoff");
     return false;
   }
 
@@ -279,10 +339,18 @@ let focused = false;
 let chosenBlock = BLOCK_TYPES.STONE;
 let sky;
 let pointLight;
+let spotLight;
 let sphere;
 let sphereLoc  = [16, 4, 22];
 let lightPos = sphereLoc.slice();
+let spotPos = [sphereLoc[0]+2, sphereLoc[1]+2, sphereLoc[2]];
+let spotDirectionVec = new Vector3([0, -1, 0]);
+let spotDirection = spotDirectionVec.elements;
+let radius = 18.0;
+let spotInner = Math.cos((Math.PI/180) * (radius-10.0));
+let spotOuter = Math.cos((Math.PI/180) * radius);
 let pointColor = [255, 0, 0];
+let spotColor = [0, 0, 255];
 let xOffset = 0;
 let yOffset = 2;
 let zOffset = 1;
@@ -304,7 +372,7 @@ function addActionsForHTML() {
 
 
   let renderSlider = document.getElementById("render");
-  renderSlider.value = 2;
+  renderSlider.value = 1;
   renderSlider.addEventListener("input", function () {
     renderDistance = chunkSize * renderSlider.value;
   });
@@ -367,6 +435,75 @@ function addActionsForHTML() {
     pointLight.baseColor[2] = pointColor[2]/255;
     pointLight.compute();
     gl.uniform3f(u_lightColor, pointColor[0]/255, pointColor[1]/255, pointColor[2]/255)
+  })
+
+  let spotSlideX = document.getElementById('spotx');
+  spotSlideX.value = spotPos[0]*10;
+  spotSlideX.addEventListener('input', ()=>{
+    spotPos[0] = spotSlideX.value/10;
+    spotLight.reset();
+    spotLight.matrix.translate(spotPos[0], spotPos[1], spotPos[2]);
+    spotLight.matrix.scale(0.25, 0.25, 0.25);
+    spotLight.compute();
+  });
+
+  let spotSlideY = document.getElementById('spoty');
+  spotSlideY.value = spotPos[1]*10;
+  spotSlideY.addEventListener('input', ()=>{
+    spotPos[1] = spotSlideY.value/10;
+    spotLight.reset();
+    spotLight.matrix.translate(spotPos[0], spotPos[1], spotPos[2]);
+    spotLight.matrix.scale(0.25, 0.25, 0.25);
+    spotLight.compute();
+  });
+
+  let spotSlideZ = document.getElementById('spotz');
+  spotSlideZ.value = spotPos[2]*10;
+  spotSlideZ.addEventListener('input', ()=>{
+    spotPos[2] = spotSlideZ.value/10;
+    spotLight.reset();
+    spotLight.matrix.translate(spotPos[0], spotPos[1], spotPos[2]);
+    spotLight.matrix.scale(0.25, 0.25, 0.25);
+    spotLight.compute();
+  });
+
+  let spotR = document.getElementById('spotR');
+  spotR.value = spotColor[0];
+  spotR.addEventListener('input', ()=>{
+    spotColor[0] = spotR.value;
+    spotLight.baseColor[0] = spotColor[0]/255;
+    spotLight.compute();
+    gl.uniform3f(u_spotColor, spotColor[0]/255, spotColor[1]/255, spotColor[2]/255)
+  })
+
+  let spotG = document.getElementById('spotG');
+  spotG.value = spotColor[1];
+  spotG.addEventListener('input', ()=>{
+    spotColor[1] = spotG.value;
+    spotLight.baseColor[1] = spotColor[1]/255;
+    spotLight.compute();
+    gl.uniform3f(u_spotColor, spotColor[0]/255, spotColor[1]/255, spotColor[2]/255)
+  })
+
+  let spotB = document.getElementById('spotB');
+  spotB.value = spotColor[2];
+  spotB.addEventListener('input', ()=>{
+    spotColor[2] = spotB.value;
+    spotLight.baseColor[2] = spotColor[2]/255;
+    spotLight.compute();
+    gl.uniform3f(u_spotColor, spotColor[0]/255, spotColor[1]/255, spotColor[2]/255)
+  })
+
+  let spotRotation = document.getElementById('spotRotate');
+  spotRotation.value = 0;
+  spotRotation.addEventListener('input', ()=>{
+    let rotMatrix = new Matrix4();
+    rotMatrix.rotate(spotRotation.value, 0, 0, 1);
+    let directionVec = rotMatrix.multiplyVector3(spotDirectionVec);
+    directionVec.normalize();
+    spotDirection = directionVec.elements;
+    console.log(spotDirection);
+    gl.uniform3f(u_spotDirection, spotDirection[0], spotDirection[1], spotDirection[2])
   })
 
   function onMouseMove(e) {
@@ -514,7 +651,7 @@ function renderAllChunks() {
 }
 
 //will only render chunks within a certain render distance from camera
-let renderDistance = chunkSize*2;
+let renderDistance = chunkSize*1;
 function renderNecessaryChunks() {
   //check the time at the start of this function
   var startTime = performance.now();
@@ -524,6 +661,10 @@ function renderNecessaryChunks() {
   gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMatrix.elements);
 
   gl.uniform3f(u_lightPos, lightPos[0], lightPos[1], lightPos[2]);
+  gl.uniform3f(u_spotPos, spotPos[0], spotPos[1], spotPos[2]);
+  gl.uniform3f(u_spotDirection, spotDirection[0], spotDirection[1], spotDirection[2]);
+  gl.uniform1f(u_lightInnerCutoff, spotInner);
+  gl.uniform1f(u_lightOuterCutoff, spotOuter);
   gl.uniform3f(u_cameraPos, camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2]);
 
   // Clear <canvas>
@@ -542,6 +683,7 @@ function renderNecessaryChunks() {
   gl.uniform1i(u_Lit, false);
   gl.uniform1i(u_Sky, false);
   pointLight.render();
+  spotLight.render();
 
   gl.uniform1i(u_Lit, true);
   gl.uniform1i(u_specularOn, true);
@@ -959,6 +1101,11 @@ function main() {
   pointLight.matrix.translate(lightPos[0], lightPos[1], lightPos[2]);
   pointLight.matrix.scale(0.25, 0.25, 0.25);
   pointLight.compute();
+
+  spotLight = new Cube([0, 0, 1, 1]);
+  spotLight.matrix.translate(spotPos[0], spotPos[1], spotPos[2]);
+  spotLight.matrix.scale(0.25, 0.25, 0.25);
+  spotLight.compute();
 
   // addWorldBlock(BLOCK_TYPES.LUCKY, -2, 0, -1)
   // addWorldBlock(BLOCK_TYPES.GRASS, 0, 0, -1)
