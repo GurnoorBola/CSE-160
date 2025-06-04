@@ -184,7 +184,7 @@ class World {
     }
 
     _InitDebug() {
-        this.debug = true;
+        this.debug = false;
         this.debugMesh = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true }));
         this.scene.add(this.debugMesh);
     }
