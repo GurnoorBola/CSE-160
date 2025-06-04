@@ -18,7 +18,18 @@ const colors = [
     new THREE.Color().setHex(0xFF6B6B),
     new THREE.Color().setHex(0x4ECDC4),
     new THREE.Color().setHex(0xFFE66D),
-    new THREE.Color().setHex(0x1A535C)
+    new THREE.Color().setHex(0x1A535C),
+    new THREE.Color().setHex(0xFF9F1C),
+    new THREE.Color().setHex(0x2EC4B6),
+    new THREE.Color().setHex(0xFFBF69),
+    new THREE.Color().setHex(0x70C1B3),
+    new THREE.Color().setHex(0xF7B801),
+    new THREE.Color().setHex(0xE63946),
+    new THREE.Color().setHex(0xA8DADC),
+    new THREE.Color().setHex(0xF1FAEE),
+    new THREE.Color().setHex(0xFFB3C1),
+    new THREE.Color().setHex(0xCAF0F8),
+    new THREE.Color().setHex(0xFFD6A5)
 ];
 
 class World {
@@ -173,7 +184,7 @@ class World {
     }
 
     _InitDebug() {
-        this.debug = false;
+        this.debug = true;
         this.debugMesh = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true }));
         this.scene.add(this.debugMesh);
     }
@@ -308,13 +319,13 @@ class World {
 
         // Create a dynamic rigid-body.
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z).setCanSleep(false);
+            .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         // Create a cuboid collider attached to the dynamic rigidBody.
         let colliderDesc = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5).setFriction(0)
-        .setDensity(1.0)
-        .setRestitution(1.1);
+        .setDensity(3.0)
+        .setRestitution(0.9);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: cube, rigidBody: rb})
     }
@@ -331,7 +342,7 @@ class World {
             this.scene.add(sphere);
 
             let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(x, 2.0, 3.0).setCanSleep(false);
+                .setTranslation(x, 2.0, 3.0);
             let rb = this.world.createRigidBody(rigidBodyDesc);
 
             let colliderDesc = RAPIER.ColliderDesc.ball(0.6).setFriction(1.5)
@@ -355,12 +366,12 @@ class World {
         this.scene.add(sphere);
 
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z).setCanSleep(false);
+            .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = RAPIER.ColliderDesc.ball(0.6).setFriction(0)
-        .setDensity(50.0)
-        .setRestitution(1.3);
+        .setDensity(3.0)
+        .setRestitution(0.9);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: sphere, rigidBody: rb})
     }
@@ -377,12 +388,12 @@ class World {
         this.scene.add(cone);
 
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z).setCanSleep(false);
+            .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = RAPIER.ColliderDesc.cone(0.5, 0.5).setFriction(0)
-        .setDensity(50.0)
-        .setRestitution(1.3);
+        .setDensity(3.0)
+        .setRestitution(0.9);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: cone, rigidBody: rb})
     }
@@ -399,12 +410,12 @@ class World {
         this.scene.add(cylinder);
 
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z).setCanSleep(false);
+            .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = RAPIER.ColliderDesc.cylinder(0.5, 0.5).setFriction(0)
-        .setDensity(10.0)
-        .setRestitution(1.3);
+        .setDensity(3.0)
+        .setRestitution(0.9);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: cylinder, rigidBody: rb})
     }
@@ -421,14 +432,14 @@ class World {
         this.scene.add(knot);
 
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(x, y, z).setCanSleep(false);
+            .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         const vertices = new Float32Array(torusKnotMesh.attributes.position.array)
         let indices = new Uint32Array(torusKnotMesh.index.array)
 
-        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices).setRestitution(1.3)
-        .setDensity(10.0);
+        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices).setRestitution(0.9)
+        .setDensity(3.0);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: knot, rigidBody: rb})
     }
@@ -468,7 +479,7 @@ class World {
         this.scene.add(heart);
 
         let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(posx, posy, posz).setCanSleep(false);
+            .setTranslation(posx, posy, posz);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
         const vertices = new Float32Array(heartMesh.attributes.position.array)
@@ -477,9 +488,8 @@ class World {
         for (let i = 0; i < vertexCount; i++) {
             indices[i] = i;
         }
-
-        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices).setRestitution(1.3)
-        .setDensity(10.0);
+        let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices, RAPIER.TriMeshFlags.FIX_INTERNAL_EDGES).setRestitution(0.9)
+        .setDensity(3.0);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: heart, rigidBody: rb})
     }
@@ -510,23 +520,26 @@ class World {
 
     addRandShape() {
         let randomIndex = Math.floor(Math.random() * 6);
+        let randomHeight = Math.floor(Math.random() * 6)
+        let randomXOffset = Math.floor((Math.random() * 6) - 2);
+        let randomZOffset = Math.floor((Math.random() * 6) - 2);
         if (randomIndex == 0) {
-            this.addCube(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addCube(this.character.model.position.x, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
         if (randomIndex == 1) {
-            this.addCone(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addCone(this.character.model.position.x + randomXOffset, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
         if (randomIndex == 2) {
-            this.addCylinder(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addCylinder(this.character.model.position.x + randomXOffset, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
         if (randomIndex == 3) {
-            this.addHeart(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addHeart(this.character.model.position.x + randomXOffset, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
         if (randomIndex == 4) {
-            this.addKnot(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addKnot(this.character.model.position.x + randomXOffset, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
         if (randomIndex == 5) {
-            this.addSphere(this.character.model.position.x, 4.0, this.character.model.position.z);
+            this.addSphere(this.character.model.position.x + randomXOffset, 4.0 + randomHeight, this.character.model.position.z + randomZOffset);
         }
     }
 
