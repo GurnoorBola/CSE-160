@@ -8,8 +8,10 @@ async function main() {
     let world = new World(canvas);
     await world.initialize();
     //world.addCube(0x44aa88, 0);
-    world.addCube(0x8844aa, -2);
-    world.addCube(0xaa8844,  2);
+    world.addText(0, 7, 0)
+    world.addHeart(-2, 3, 0);
+    world.addCube(2, 3, 0);
+    world.addBall()
     world.start();
 }
 

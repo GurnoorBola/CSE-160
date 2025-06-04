@@ -1,5 +1,0 @@
-class FoliageManger {
-    constructor () {
-
-    }
-}
