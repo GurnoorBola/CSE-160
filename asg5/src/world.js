@@ -62,6 +62,8 @@ class World {
 
     this._InitDebug();
 
+    this._InitMatGeo();
+
     this._initialized = true;
     this._lastTime = performance.now() * 0.001;
     requestAnimationFrame(this._RAF);
@@ -181,6 +183,48 @@ class World {
                 spacePressed = false;
             }
         }, false);
+    }
+
+    _InitMatGeo() {
+        //cube
+        this.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+        //sphere
+        this.sphereGeometry = new THREE.SphereGeometry(1, 32, 16);
+
+        //cone
+        this.coneGeometry = new THREE.ConeGeometry(0.5, 1, 20);
+
+        //cylinder
+        this.cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1);
+
+        //knot
+        this.knotGeometry = new THREE.TorusKnotGeometry(0.5, 0.3);
+
+        //heart
+        const shape = new THREE.Shape();
+        const x = 2.5;
+        const y = 5;
+        shape.moveTo(x + 2.5, y + 2.5);
+        shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+        shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+        shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+        shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+        shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+        shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+
+        const extrudeSettings = {
+            steps: 2,  
+            depth: 2,  
+            bevelEnabled: true,  
+            bevelThickness: 1,  
+            bevelSize: 1,  
+            bevelSegments: 2,  
+        };
+
+        this.heartGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        this.heartGeometry.center();
+        this.heartGeometry.scale(0.15, 0.15, 0.15);
     }
 
     _InitDebug() {
@@ -306,10 +350,9 @@ class World {
     }
 
     addCube(x=0, y=0, z=0) {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        let cube = new THREE.Mesh(geometry, material)
+        let cube = new THREE.Mesh(this.cubeGeometry, material)
         // cube.receiveShadow = true;
         // cube.castShadow = true;
         cube.position.x = x;
@@ -331,10 +374,9 @@ class World {
     }
 
     addBall(x=0) {
-        const geometry = new THREE.SphereGeometry(1, 32, 16);
         this._textureLoader.load('img/textures/ball.jpg', (texture) => {
             const material = new THREE.MeshPhongMaterial({map: texture });
-            const sphere = new THREE.Mesh(geometry, material);
+            const sphere = new THREE.Mesh(this.sphereGeometry, material);
             sphere.scale.set(0.6, 0.6, 0.6);
             sphere.position.x = x;
             sphere.position.y = 2.0;
@@ -354,10 +396,9 @@ class World {
     }
 
     addSphere(x=0, y=0, z=0) {
-        const geometry = new THREE.SphereGeometry(1, 32, 16);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        const sphere = new THREE.Mesh(geometry, material);
+        const sphere = new THREE.Mesh(this.sphereGeometry, material);
         sphere.scale.set(0.6, 0.6, 0.6);
         sphere.position.x = x;
         sphere.position.y = y;
@@ -377,10 +418,9 @@ class World {
     }
 
     addCone(x=0, y=0, z=0) {
-        const geometry = new THREE.ConeGeometry(0.5, 1, 20);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        const cone = new THREE.Mesh(geometry, material);
+        const cone = new THREE.Mesh(this.coneGeometry, material);
         cone.position.x = x;
         cone.position.y = y;
         cone.position.z= z;
@@ -399,10 +439,9 @@ class World {
     }
 
     addCylinder(x=0, y=0, z=0) {
-        const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        const cylinder = new THREE.Mesh(geometry, material);
+        const cylinder = new THREE.Mesh(this.cylinderGeometry, material);
         cylinder.position.x = x;
         cylinder.position.y = y;
         cylinder.position.z = z;
@@ -421,10 +460,9 @@ class World {
     }
 
     addKnot(x=0, y=0, z=0) {
-        const torusKnotMesh = new THREE.TorusKnotGeometry(0.5, 0.3);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        const knot = new THREE.Mesh(torusKnotMesh, material);
+        const knot = new THREE.Mesh(this.knotGeometry, material);
         knot.position.x = x;
         knot.position.y = y;
         knot.position.z = z;
@@ -435,8 +473,8 @@ class World {
             .setTranslation(x, y, z);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
-        const vertices = new Float32Array(torusKnotMesh.attributes.position.array)
-        let indices = new Uint32Array(torusKnotMesh.index.array)
+        const vertices = new Float32Array(this.knotGeometry.attributes.position.array)
+        let indices = new Uint32Array(this.knotGeometry.index.array)
 
         let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices).setRestitution(0.9)
         .setDensity(3.0);
@@ -445,33 +483,9 @@ class World {
     }
 
     addHeart(posx=0, posy=0, posz=0) {
-        //from three.js website
-        const shape = new THREE.Shape();
-        const x = 2.5;
-        const y = 5;
-        shape.moveTo(x + 2.5, y + 2.5);
-        shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
-        shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-        shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
-
-        const extrudeSettings = {
-            steps: 2,  
-            depth: 2,  
-            bevelEnabled: true,  
-            bevelThickness: 1,  
-            bevelSize: 1,  
-            bevelSegments: 2,  
-        };
-
-        const heartMesh = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        heartMesh.center();
-        heartMesh.scale(0.15, 0.15, 0.15);
         let randomIndex = Math.floor(Math.random() * colors.length);
         const material = new THREE.MeshPhongMaterial({color: colors[randomIndex]});
-        const heart = new THREE.Mesh(heartMesh, material);
+        const heart = new THREE.Mesh(this.heartGeometry, material);
         heart.position.x = posx;
         heart.position.y = posy;
         heart.position.z= posz;
@@ -482,14 +496,14 @@ class World {
             .setTranslation(posx, posy, posz);
         let rb = this.world.createRigidBody(rigidBodyDesc);
 
-        const vertices = new Float32Array(heartMesh.attributes.position.array)
-        const vertexCount = heartMesh.attributes.position.count;
+        const vertices = new Float32Array(this.heartGeometry.attributes.position.array)
+        const vertexCount = this.heartGeometry.attributes.position.count;
         const indices = new Uint32Array(vertexCount);
         for (let i = 0; i < vertexCount; i++) {
             indices[i] = i;
         }
         let colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices, RAPIER.TriMeshFlags.FIX_INTERNAL_EDGES).setRestitution(0.9)
-        .setDensity(3.0);
+        .setDensity(0.00001);
         let collider = this.world.createCollider(colliderDesc, rb);
         this._objects.push({mesh: heart, rigidBody: rb})
     }
