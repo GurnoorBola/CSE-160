@@ -367,6 +367,9 @@ function addActionsForHTML() {
   canvas = document.getElementById("webgl");
 
   canvas.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      canvas.requestFullscreen();
+    }
     canvas.requestPointerLock();
   });
 
@@ -616,6 +619,25 @@ function addActionsForHTML() {
     gl.uniform1i(u_lightToggle, false);
   });
 
+}
+
+//hide buttons and stuff
+var on = false;
+function displayOptions() {
+  var button = document.getElementById("showText");
+  var text = document.getElementById("options");
+  var instructions = document.getElementById("instructions")
+  if (on) {
+    text.style.display = "none";
+    instructions.style.display = "block";
+    button.textContent = "Configure";
+    on = false;
+  } else {
+    text.style.display = "block";
+    instructions.style.display = "none";
+    button.textContent = "Instructions";
+    on = true;
+  }
 }
 
 var g_chunksList = [];

@@ -2,10 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Lighting</title>
+    <title>Voxel World</title>
   </head>
 
   <body onload="main()">
+    <div style="text-align: center;">
     <style>
       /* canvas {
         cursor: none;
@@ -14,10 +15,33 @@
 
     <canvas id="webgl" width='800' height='450' tabindex="0">
       Please use a browser that supports 'canvas'
-    </canvas>
+    </canvas><br>
 
-    <p id="numdot">XXX</p>
+    <span id="numdot" style="display:inline-block; width:220px; text-align: left;">XXX</span><br><br>
+    <button id="showText" onclick="displayOptions()"> Configure </button>
 
+    <div id = "instructions" style="max-width: 600px; margin: 0 auto; line-height: 1.5;">
+
+      <p>
+        <strong>Controls:</strong><br>
+        Use WASD to move around the world. Use your mouse or Q & E to turn.
+        Use left click to place block and right click to remove.<br>
+        Click num keys 1–6 to change which block you place.
+      </p>
+
+      <strong>Blocks:</strong>
+      <p>
+        1: Lucky Block<br>
+        2: Grass Block<br>
+        3: Dirt Block<br>
+        4: Stone Block<br>
+        5: Wooden Plank<br>
+        6: Pumpkin<br>
+      </p>
+    </div>
+
+
+    <div id="options" style="display: none;">
     <p>
        <label style="display: inline-block; width: 50px">Render Distance</label>
       <input
@@ -159,31 +183,15 @@
       <button type="button" id="lightoff">Lighting Off</button>
     </p>
 
-    <p style="max-width: 600px; line-height: 1.5;">
-      <strong>Controls:</strong><br>
-      Use WASD to move around the world. Use your mouse or Q & E to turn. Use left click to place block and right click to remove.<br>
-      Click num keys 1–6 to change which block you place.
-    </p>
-
-    <p style="max-width: 600px; line-height: 1.5;">
-      <strong>Blocks:</strong><br>
-      <ul>
-        <li>1: Lucky Block</li>
-        <li>2: Grass Block</li>
-        <li>3: Dirt Block</li>
-        <li>4: Stone Block</li>
-        <li>5: Wooden Plank</li>
-        <li>6: Pumpkin</li>
-      </ul>
-    </p>
 
 
-    <br />
+    <!-- <br />
     <p>Gurnoor Bola <br />gsbola@ucsc.edu</p>
     <p style="max-width: 600px; line-height: 1.5;"><strong>Notes to Grader: </strong></p>
     <p style="max-width: 600px; line-height: 1.5;">
       The red light is a point light and the blue is a spot light. You can change the colors and locations of both of them. There is an animation for the point light and a rotation slider for the spot light. 
-    </p>
+    </p> -->
+  </div>
     
 
     <script src="lib/webgl-utils.js"></script>
@@ -196,5 +204,6 @@
     <script src="src/Block.js"></script>
     <script src="src/Camera.js"></script>
     <script src="src/asg4.js"></script>
+  </div>
   </body>
 </html>
