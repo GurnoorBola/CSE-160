@@ -367,9 +367,6 @@ function addActionsForHTML() {
   canvas = document.getElementById("webgl");
 
   canvas.addEventListener("click", () => {
-    if (!document.fullscreenElement) {
-      canvas.requestFullscreen();
-    }
     canvas.requestPointerLock();
   });
 
